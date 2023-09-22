@@ -80,6 +80,8 @@ button:hover {
 }
 
 .error-message {
-  color: #ff0000;
+  color: rgb(130, 8, 0);
   margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 400;
 }
