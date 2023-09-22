@@ -44,21 +44,23 @@ function LoginPage() {
   return (
     <div className="login-page">
       <h1> Hoosier Room</h1>
-      <h2>Login</h2>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <div className="login-form">
+        <h2>Login in to your acccount</h2>
         <div className="form-group">
           <label htmlFor="username">Username</label>
+          <span className="required">*</span>
           <input
             type="text"
             id="username"
-            placeholder="Enter your username"
+            placeholder="Enter your email address"
             value={username}
             onChange={handleUsernameChange}
           />
         </div>
         <div className="form-group">
           <label htmlFor="password">Password</label>
+          <span className="required">*</span>
           <input
             type="password"
             id="password"
@@ -67,11 +69,14 @@ function LoginPage() {
             onChange={handlePasswordChange}
           />
         </div>
-        <button onClick={handleLogin}>Login</button>
-        <div className="additional-options">
+        <div class="actions">
+          <button onClick={handleLogin}>Login</button>
+        </div>
+        <a href="/" id="forgot-password">Forgot password?</a>
+        {/* <div className="additional-options">
           <button onClick={handleForgotPassword}>Forgot Password</button>
           <button onClick={handleSignUp}>Sign Up</button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

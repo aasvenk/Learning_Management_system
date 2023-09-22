@@ -4,23 +4,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-image: url('/src/LMS logo.jpg');
+  height: 80vh;
+  /* background-image: url('../public/logo.jpg');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
+  background-repeat: no-repeat; */
 }
 
 .login-form {
+  width: 30%;
   background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
+  padding: 40px;
+  border-radius: 20px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-  text-align: center;
+  /* text-align: center; */
 }
 
 .login-form h2 {
   margin-bottom: 20px;
+  font-weight: 10;
 }
 
 .form-group {
@@ -28,36 +30,53 @@
 }
 
 label {
-  display: block;
+  font-family: 'Jetbrains Mono';
   font-weight: bold;
+  color: rgb(0, 105, 255);
+  text-transform: lowercase;
+  font-size: 1rem;
 }
 
-input[type="text"],
-input[type="password"] {
+span.required {
+  color: rgb(255, 58, 46);
+}
+
+#username,
+#password {
+  font-family: 'Jetbrains Mono';
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 3px;
+  border-radius: 10px;
   font-size: 16px;
+  margin: 0.5rem 0rem;
+  box-sizing:border-box
 }
 
-button {
+.login-page button {
   width: 100%;
   padding: 10px;
   background-color: #007bff;
   color: #fff;
   border: none;
-  border-radius: 3px;
+  border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
+  margin: 5px;
+}
+
+.actions {
+  margin-bottom: 2rem;
 }
 
 button:hover {
   background-color: #0056b3;
 }
 
-.additional-options {
-  margin-top: 15px;
+#forgot-password {
+  font-family: 'Jetbrains Mono';
+  color: rgb(0, 105, 255);
+  margin-top: 15px !important;
 }
 
 .error-message {
