@@ -19,3 +19,10 @@ REACT_APP_BASE_URL=
 ```
 npm run start
 ```
+
+## Productions
+
+```
+npm run build
+sudo cp -r build/* /var/www/html/
+```
