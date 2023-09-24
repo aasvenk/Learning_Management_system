@@ -46,4 +46,5 @@ curl http://127.0.0.1:8080
 gunicorn -w 4 'api:api'
 # Run in background
 gunicorn -w 4 'api:api' --daemon
+pkill gunicorn
 ```
