@@ -15,7 +15,7 @@ api.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 api.wsgi_app = ProxyFix(
     api.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
 )
-cors = CORS(api, resources={r"/*": {"origins": "http://134.209.174.81/"}})
+cors = CORS(api, origins=[api.config["CROSS_ORIGIN_URL"]])
 
 jwt = JWTManager(api)
 
@@ -41,7 +41,7 @@ def refresh_expiring_jwts(response):
         return response
 
 
-@api.route('/token', methods=["POST"])
+@api.route('/login', methods=["POST"])
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)

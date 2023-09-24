@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import axios from "axios";
 import "./App.css";
+
+axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -20,18 +23,11 @@ function LoginPage() {
     setPasswordError("");
 
     let isFormValid = true;
-    // Client-side validation
     if (username.trim() === "") {
       setUsernameError("Username is required");
       isFormValid = false;
     }
 
-    // Password validation
-    // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
-    // if (!password.match(passwordRegex)) {
-    //   setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special symbol');
-    //   return;
-    // }
     if (password.trim() === "") {
       setPasswordError("Password is required");
       isFormValid = false;
@@ -41,15 +37,17 @@ function LoginPage() {
       return;
     }
 
-    // need to add logic if both password and username is correct
-  };
-
-  const handleForgotPassword = () => {
-    // Need to add logic for Forgot password page redirect
-  };
-
-  const handleSignUp = () => {
-    // Need to add logic for sign up page redirect
+    axios
+    .post("/login", {
+      email: username,
+      password: password
+    })
+    .then((response) => {
+      alert('Token: ' + response.data.access_token)
+    })
+    .catch((error) => {
+      alert('Incorrect credentials')
+    });
   };
 
   return (
@@ -99,10 +97,6 @@ function LoginPage() {
           <a href="/" id="forgot-password">
             Forgot password?
           </a>
-          {/* <div className="additional-options">
-          <button onClick={handleForgotPassword}>Forgot Password</button>
-          <button onClick={handleSignUp}>Sign Up</button>
-        </div> */}
         </div>
       </div>
     </div>
