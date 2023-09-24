@@ -5,6 +5,7 @@ load_dotenv()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Configuration(object):
+    CROSS_ORIGIN_URL = os.environ.get('CROSS_ORIGIN_URL')
     SECRET_KEY = os.environ.get('SECRET_KEY')
     POSTGRES_USER = os.environ.get('POSTGRES_USER')
     POSTGRES_PW = os.environ.get('POSTGRES_PW')
