@@ -1,15 +1,27 @@
 import json
-from flask import Flask, request, jsonify
+from config import Configuration
+from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 from datetime import datetime, timedelta, timezone
-from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, \
-    unset_jwt_cookies, jwt_required, JWTManager
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
+from flask_jwt_extended import unset_jwt_cookies, jwt_required, JWTManager
 
 
 api = Flask(__name__)
+api.config.from_object(Configuration)
 api.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+
+api.wsgi_app = ProxyFix(
+    api.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
+cors = CORS(api, resources={r"/*": {"origins": "http://134.209.174.81/"}})
 
 jwt = JWTManager(api)
 
+@api.route('/')
+def hello():
+    return make_response('Server is running...', 200)
 
 @api.after_request
 def refresh_expiring_jwts(response):

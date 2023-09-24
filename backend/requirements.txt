@@ -1,4 +1,5 @@
 absl-py==1.4.0
+alembic==1.12.0
 altair==5.1.1
 aniso8601==9.0.1
 annotated-types==0.5.0
@@ -43,10 +44,12 @@ entrypoints==0.4
 et-xmlfile==1.1.0
 executing==1.0.0
 fastjsonschema==2.16.1
-Flask==2.2.3
+Flask==2.3.3
 Flask-Cors==3.0.10
 Flask-JWT-Extended==4.5.2
+Flask-Migrate==4.0.5
 Flask-RESTful==0.3.9
+Flask-SQLAlchemy==3.1.1
 flatbuffers==23.3.3
 fonttools==4.38.0
 fqdn==1.5.1
@@ -56,6 +59,7 @@ GitPython==3.1.37
 google-auth==2.17.3
 google-auth-oauthlib==1.0.0
 google-pasta==0.2.0
+greenlet==2.0.2
 grpcio==1.54.0
 h5py==3.8.0
 idna==3.4
@@ -87,6 +91,7 @@ kiwisolver==1.4.4
 langcodes==3.3.0
 libclang==16.0.0
 lxml==4.9.1
+Mako==1.2.4
 Markdown==3.4.3
 markdown-it-py==3.0.0
 MarkupSafe==2.1.1
@@ -168,6 +173,7 @@ soupsieve==2.3.2.post1
 spacy==3.6.1
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
+SQLAlchemy==2.0.21
 sqlparse==0.4.3
 srsly==2.4.8
 stack-data==0.5.0
@@ -203,6 +209,6 @@ wcwidth==0.2.5
 webcolors==1.12
 webencodings==0.5.1
 websocket-client==1.5.0
-Werkzeug==2.2.3
+Werkzeug==2.3.7
 wrapt==1.14.1
 zipp==3.17.0
