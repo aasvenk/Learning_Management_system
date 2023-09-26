@@ -1,0 +1,86 @@
+.Sign-Up {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  span.required {
+    color: rgb(255, 58, 46);
+  }
+  
+  .Signup-header {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 65px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    background: rgb(255, 255, 255);
+    z-index: 2;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 3px;
+  }
+  
+  .Signup-header .title {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  
+  .Sign-Up button {
+    width: 100%; /* Adjust button width as needed */
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+    margin-top: 1rem; /* Add some spacing above the button */
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  #firstName,
+  #lastName,
+  #password,
+  #passwordRetype,
+  #email,
+  #securityQuestion {
+    font-family: "Jetbrains Mono";
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    margin: 0.5rem 0rem;
+    box-sizing: border-box;
+    text-transform: none;
+  }
+
+label {
+    font-family: "Jetbrains Mono";
+    font-weight: bold;
+    color: rgb(0, 105, 255);
+    text-transform: lowercase;
+    font-size: 1rem;
+  }
+
+.form-group {
+    margin-bottom: 15px;
+  }
+
+.signup-form{
+    width: 30%;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
