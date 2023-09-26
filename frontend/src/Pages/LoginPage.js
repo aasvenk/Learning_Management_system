@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "./LoginPage.css";
+import AppHeader from "../components/AppHeader";
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
@@ -53,15 +54,7 @@ function LoginPage() {
 
   return (
     <div>
-      <div className="login-header">
-        <span className="title">Hoosier Room</span>
-        <p>
-          <span className="signup-msg">Don't have an account?</span>
-          <Link to="/signup" className="signup-link">
-            Sign up
-          </Link>
-        </p>
-      </div>
+      <AppHeader />
 
       <div className="login-page">
         <div className="login-form">
@@ -97,9 +90,9 @@ function LoginPage() {
           <div className="actions">
             <button onClick={handleLogin}>Login</button>
           </div>
-          <a href="/" id="forgot-password">
+          <Link to="/forgot-password" id="forgot-password">
             Forgot password?
-          </a>
+          </Link>
         </div>
       </div>
     </div>

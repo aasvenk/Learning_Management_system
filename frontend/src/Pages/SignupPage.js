@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import  "./SignUpPage.css";
+import { Link } from "react-router-dom";
 
 function SignupPage() {
   const [firstName, setFirstName] = useState("");
@@ -46,7 +47,9 @@ function SignupPage() {
   return (
     <div>
       <div className="Signup-header">
-        <span className="title">Hoosier Room</span>
+        <Link to="/">
+          <span className="title">Hoosier Room</span>
+        </Link>
       </div>
       <div className = 'Sign-Up'>
         <div className="signup-form">
