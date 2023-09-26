@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import "./App.css";
+import "./LoginPage.css";
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
@@ -57,7 +57,7 @@ function LoginPage() {
         <span className="title">Hoosier Room</span>
         <p>
           <span className="signup-msg">Don't have an account?</span>
-          <Link to="/SignupPage" className="signup-link">
+          <Link to="/signup" className="signup-link">
             Sign up
           </Link>
         </p>

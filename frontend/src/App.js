@@ -1,15 +1,15 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import LoginPage from "/src/Pages/LoginPage";
-import SignupPage from "/src/Pages/SignupPage";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import LoginPage from "./Pages/LoginPage";
+import SignupPage from "./Pages/SignupPage";
 
 function App() {
   return (
     <Router>
-      <Switch>
-        <Route path="/SignupPage" component={SignupPage} />
-        <Route path="/" component={LoginPage} />
-      </Switch>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
     </Router>
   );
 }
