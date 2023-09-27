@@ -45,6 +45,15 @@ def refresh_expiring_jwts(response):
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
+
+    #Handle Missing email or password
+
+    if email == "" or password == "":
+        return {"msg": "Please verify email and password fields."}, 401
+
+    
+    #ToDo: Check user data against db
+
     if email != "test" or password != "test":
         return {"msg": "Wrong email or password"}, 401
 
@@ -53,18 +62,60 @@ def create_token():
     return response
 
 
+
+
+@api.route("/resetPassword", methods=["POST"])
+def resetPassword():
+    data = request.json
+    email = data["email"]
+
+    #ToDo Send Email to Update Password
+    #ToDo Update Password in Database
+    #Should I be recieving a secret question response?
+
+@api.route("/register", methods=["POST"])
+def register():
+    data = request.json
+    email = data["email"]
+    password = data["password"]
+    password2 = data["password2"]
+    firstName = data["firstName"]
+    lastName = data["lastName"]
+    secQuestion = data["secQuestion"]
+    secAnswer = data["secAnswer"]
+
+    expected_keys = ["email", "password", "password2", "firstName", "lastName", "secQuestion", "secAnswer"]
+
+    # Handle Missing Fields
+    if any(key not in data or data[key] == "" for key in expected_keys):
+        return {"msg": "Please enter all fields."}, 401
+
+    #Handle Mismatched Passwords
+    if password != password2:
+        return {"msg": "Please verify that your passwords match."}, 401
+    
+    #ToDo: Add User Data to db
+
+@api.route("/profile", methods=["GET"])
+@jwt_required()
+def profile():
+    data = request.json
+    email = data["email"]
+
+    #Handle No Email
+    if email == "":
+        return {"msg": "Please verify that your passwords match."}, 401
+    
+    #ToDo Pull UserData from DataBase
+
+
 @api.route("/logout", methods=["POST"])
+@jwt_required()
 def logout():
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
     return response
+    
 
 
-@api.route('/profile')
-@jwt_required()
-def my_profile():
-    response_body = {
-        "name": "Nagato",
-        "about": "Hello! I'm a full stack developer that loves python and javascript"
-    }
-    return response_body
+    
