@@ -45,6 +45,12 @@ def refresh_expiring_jwts(response):
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
+
+    #Handle Missing email or password
+
+    if email == "" or password == "":
+        return {"msg": "Please verify email and password fields."}, 401
+
     
     #ToDo: Check user data against db
 
@@ -56,14 +62,10 @@ def create_token():
     return response
 
 
-@api.route("/logout", methods=["POST"])
-def logout():
-    response = jsonify({"msg": "logout successful"})
-    unset_jwt_cookies(response)
-    return response
 
-@api.route("/reset-password", methods=["POST"])
-def logout():
+
+@api.route("/resetPassword", methods=["POST"])
+def resetPassword():
     data = request.json
     email = data["email"]
 
@@ -105,6 +107,14 @@ def profile():
         return {"msg": "Please verify that your passwords match."}, 401
     
     #ToDo Pull UserData from DataBase
+
+
+@api.route("/logout", methods=["POST"])
+@jwt_required()
+def logout():
+    response = jsonify({"msg": "logout successful"})
+    unset_jwt_cookies(response)
+    return response
     
 
 
