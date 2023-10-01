@@ -97,7 +97,7 @@ function RecoverOptions() {
             <FontAwesomeIcon icon={faArrowLeft} /> Back
           </span>
           <h1>Security question</h1>
-          <label>What is the name of your pet?</label>
+          <label>What is your birth city?</label>
           <span className="required">*</span>
           <input
             type="text"
