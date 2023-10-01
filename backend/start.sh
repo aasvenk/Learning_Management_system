@@ -1,1 +1,1 @@
-gunicorn -w 4 'api:api' --daemon
+gunicorn -w 4 'app:app' --daemon
