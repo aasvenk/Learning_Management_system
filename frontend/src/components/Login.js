@@ -98,7 +98,7 @@ function Login() {
             Forgot password?
           </Link>
           <p>
-            <span className="signup-msg">Don't have an account?</span>
+            <span className="signup-msg">Don't have an account? </span>
             <Link to="/signup" className="signup-link">
               Sign up
             </Link>
