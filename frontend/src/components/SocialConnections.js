@@ -17,7 +17,7 @@ function SocialConnections() {
   return (
     <div>
       <center>
-        <Button variant="contained" disableElevation onClick={handleGoogleSignIn}>Google</Button>
+        <Button variant="contained" disableElevation onClick={handleGoogleSignIn}>Sign in Google</Button>
       </center>
     </div>
   );
