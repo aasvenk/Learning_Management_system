@@ -171,7 +171,7 @@ function RecoverOptions() {
             <div className="recover-options">
               <button onClick={(e)=> {handleRecoveryType() && setOption('using-security')}}>Security question</button>
               <button onClick={(e)=> {handleRecoveryType() && handleEmailRecovery() && setOption('using-email')}}>Email</button>
-              <button onClick={(e)=> {handleRecoveryType() && setOption('using-otp')}}>OTP</button>
+              {/* <button onClick={(e)=> {handleRecoveryType() && setOption('using-otp')}}>OTP</button> */}
             </div>
           </div>
         </div>
