@@ -48,3 +48,6 @@ gunicorn -w 4 'api:api'
 gunicorn -w 4 'api:api' --daemon
 pkill gunicorn
 ```
+
+## References
+https://github.com/Abhiramborige/Flask-React-Google-Login/blob/main/flask-server-google/app.py

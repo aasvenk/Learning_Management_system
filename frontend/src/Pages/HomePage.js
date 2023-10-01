@@ -15,7 +15,6 @@ function HomePage() {
         {!isLoggedIn && <Login />}
         {isLoggedIn && <Welcome />}
       </div>
-      
     </div>
   );
 }

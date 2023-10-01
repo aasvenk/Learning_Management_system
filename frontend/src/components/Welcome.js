@@ -12,6 +12,7 @@ function Welcome() {
         }
       })
       .then((response) => {
+        console.log(response.data.userInfo)
         setUserInfo(response.data.userInfo)
       })
       .catch((error) => {
@@ -21,7 +22,7 @@ function Welcome() {
 
   return (
     <div>
-      <h1>Welcome {userInfo.firstName}, {userInfo.lastName}</h1>
+      <h1>Welcome {userInfo.lastName}, {userInfo.firstName}</h1>
     </div>
   );
 }

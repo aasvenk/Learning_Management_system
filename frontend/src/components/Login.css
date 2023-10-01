@@ -53,7 +53,7 @@ span.required {
   box-sizing: border-box;
 }
 
-.login-page button {
+.login-page button.login {
   width: 100%;
   padding: 10px;
   background-color: #007bff;

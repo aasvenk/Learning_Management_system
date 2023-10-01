@@ -4,13 +4,25 @@ import { useSelector} from 'react-redux'
 import Button from '@mui/material/Button'
 import { useDispatch } from 'react-redux'
 import { setLoggedIn, setToken} from '../slices/userSlice'
+import axios from "axios"
 
 function AppHeader() {
   const dispatch = useDispatch()
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
   const handleLogout = () => {
-    dispatch(setLoggedIn(false))
-    dispatch(setToken(""))
+      axios
+      .get("/logout", {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then((response) => {
+        dispatch(setLoggedIn(false))
+        dispatch(setToken(""))
+      })
+      .catch((error) => {
+        console.error(error)
+      });
   }
   return (
     <div className="login-header">

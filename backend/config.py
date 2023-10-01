@@ -13,3 +13,6 @@ class Configuration(object):
     POSTGRES_DB = os.environ.get('POSTGRES_DB')
     SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=POSTGRES_USER,pw=POSTGRES_PW,url=POSTGRES_URL,db=POSTGRES_DB)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+    BACKEND_URL=os.environ.get('BACKEND_URL')
+    FRONTEND_URL=os.environ.get('FRONTEND_URL')

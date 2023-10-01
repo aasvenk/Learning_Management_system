@@ -4,6 +4,8 @@ import axios from "axios";
 import { useDispatch } from 'react-redux'
 import { setLoggedIn, setToken} from '../slices/userSlice'
 import "./Login.css"
+import SocialConnections from "./SocialConnections";
+
 
 function Login() {
   const dispatch = useDispatch()
@@ -88,8 +90,10 @@ function Login() {
             )}
           </div>
           <div className="actions">
-            <button onClick={handleLogin}>Login</button>
+            <button className="login" onClick={handleLogin}>Login</button>
           </div>
+          <hr></hr>
+          <SocialConnections />
           <Link to="/forgot-password" id="forgot-password">
             Forgot password?
           </Link>
