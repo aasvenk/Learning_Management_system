@@ -18,6 +18,8 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
+from flask_mail import Mail, Message
+
 app = Flask(__name__)
 app.config.from_object(Configuration)
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
@@ -27,6 +29,8 @@ app.wsgi_app = ProxyFix(
 cors = CORS(app, origins=[app.config["CROSS_ORIGIN_URL"]])
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
+mail = Mail(app)
+
 from models import User, PasswordRecovery
 
 
@@ -211,22 +215,23 @@ def recoverPassword():
     if recover:
         url = Configuration.FRONTEND_URL + '/resetpassword?email=' + email + '&token=' + recover.token
         return make_response(jsonify(reset_url=url), 200)
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return make_response(jsonify(msg="user not found"), 401)
 
     if type == 'using_security_question':
         if 'security_answer' not in data:
             return make_response(jsonify(msg="secuirty answer missing"), 401)
-        
         ans = data['security_answer']
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return make_response(jsonify(msg="user not found"), 401)
-        
         if not user.verify_security_question(ans):
             return make_response(jsonify(msg="incorrect security answer"), 401)
-        
         return make_response(jsonify(reset_url=create_reset_url(email)), 200)
     elif type == 'using_email':
-        print('email')
+        print("email")
+        # if account exists send mail
+        send_mail(toMail=email, subject='Reset password', body=create_reset_url(email))
+        return make_response(jsonify(msg="email sent"), 200)
     elif type == 'otp':
         print('otp')
 
@@ -250,6 +255,9 @@ def resetPassword():
     user.password = generate_password_hash(password)
     db.session.commit()
 
+    # Delete password recovery record after resetting the password
+    db.session.delete(record)
+
     return make_response(jsonify(msg="reset successful"), 200)
 
 
@@ -266,6 +274,12 @@ def logout():
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
     return make_response(response, 200)
+
+def send_mail(toMail, subject, body):
+    print('mail sent')
+    msg = Message(subject, sender= 'hoosierroom@gmail.com', recipients = [toMail])
+    msg.body = body
+    mail.send(msg)
 
 
 @app.cli.command('resetdb')

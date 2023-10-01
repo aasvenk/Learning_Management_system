@@ -26,15 +26,12 @@ function RecoverOptions() {
   };
 
   const clearForm = () => {
-    console.log("clear")
     setEmail('')
     setOption('recover')
   }
 
   const handleRecoveryType = () => {
     setEmailError("");
-
-    console.log(email)
 
     let isFormValid = true;
     if (email.trim() === "") {
@@ -70,7 +67,25 @@ function RecoverOptions() {
     .catch((err) => {
       console.error(err)
     })
+  }
 
+  const handleEmailRecovery = () => {
+    console.log("hello")
+    axios
+    .post('/recoverPassword', {
+      'type': 'using_email',
+      'email': email,
+    })
+    .then((response) => {
+      let {msg} = response.data
+      if (msg === "email sent") {
+        console.log("email sent")
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+    return true
   }
 
   let toRender;
@@ -103,7 +118,7 @@ function RecoverOptions() {
           </span>
           <h1>Email</h1>
           <p>
-            A recovery link has been sent to your email. Please follow the instructions.
+            A recovery link will be sent to your email. Please follow the instructions.
             <br/>
             <br/>
             <Link to={"/"}>Go home</Link>
@@ -155,7 +170,7 @@ function RecoverOptions() {
           <label>How do you want to recover?</label>
             <div className="recover-options">
               <button onClick={(e)=> {handleRecoveryType() && setOption('using-security')}}>Security question</button>
-              <button onClick={(e)=> {handleRecoveryType() && setOption('using-email')}}>Email</button>
+              <button onClick={(e)=> {handleRecoveryType() && handleEmailRecovery() && setOption('using-email')}}>Email</button>
               <button onClick={(e)=> {handleRecoveryType() && setOption('using-otp')}}>OTP</button>
             </div>
           </div>
