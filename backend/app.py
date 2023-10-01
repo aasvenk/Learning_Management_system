@@ -1,6 +1,7 @@
 import os
 import pathlib
 import requests
+import secrets
 import json
 from config import Configuration
 from flask import Flask, request, jsonify, make_response, session, redirect
@@ -26,7 +27,7 @@ app.wsgi_app = ProxyFix(
 cors = CORS(app, origins=[app.config["CROSS_ORIGIN_URL"]])
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
-from models import User
+from models import User, PasswordRecovery
 
 
 
@@ -62,7 +63,6 @@ def callback():
         id_token=credentials._id_token, request=token_request,
         audience=Configuration.GOOGLE_CLIENT_ID
     )
-    print(id_info)
     email = id_info["email"]
 
     # If no user, create
@@ -127,8 +127,6 @@ def register():
     # if password != password2:
     #     return {"msg": "Please verify that your passwords match."}, 401
 
-    print(email)
-    print(User.query.filter_by(email=email).first() is not None)
 
     if User.query.filter_by(email=email).first() is not None:
         # User already exists
@@ -165,7 +163,6 @@ def create_token():
     #     return make_response(response, 200)
 
     user = User.query.filter_by(email=email).first()
-    print(user)
     if user is None or not user.verify_password(password):
         return make_response(jsonify("Incorrect email or password"), 401)
 
@@ -192,21 +189,73 @@ def get_user_info():
     return make_response(jsonify(response), 200)
 
 
+def create_reset_url(email):
+    token = secrets.token_hex()
+    db.session.add(
+        PasswordRecovery(
+            email=email,
+            token=token
+        )
+    )
+    db.session.commit()
+    return Configuration.FRONTEND_URL + '/resetpassword?email=' + email + '&token=' + token
+
+@app.route("/recoverPassword", methods=["POST"])
+def recoverPassword():
+    data = request.json
+    email = data["email"]
+    type = data["type"]
+
+    # Already has reset url
+    recover = PasswordRecovery.query.filter_by(email=email).first()
+    if recover:
+        url = Configuration.FRONTEND_URL + '/resetpassword?email=' + email + '&token=' + recover.token
+        return make_response(jsonify(reset_url=url), 200)
+
+    if type == 'using_security_question':
+        if 'security_answer' not in data:
+            return make_response(jsonify(msg="secuirty answer missing"), 401)
+        
+        ans = data['security_answer']
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return make_response(jsonify(msg="user not found"), 401)
+        
+        if not user.verify_security_question(ans):
+            return make_response(jsonify(msg="incorrect security answer"), 401)
+        
+        return make_response(jsonify(reset_url=create_reset_url(email)), 200)
+    elif type == 'using_email':
+        print('email')
+    elif type == 'otp':
+        print('otp')
+
+    return make_response(jsonify(msg="invalid recovery type"), 401)
+
 @app.route("/resetPassword", methods=["POST"])
-@jwt_required()
 def resetPassword():
     data = request.json
     email = data["email"]
+    token = data["token"]
+    password = data["password"]
 
-    # ToDo Send Email to Update Password
-    # ToDo Update Password in Database
-    # Should I be recieving a secret question response?
+    # verify the token
+    record = PasswordRecovery.query.filter_by(email=email).filter_by(token=token).first()
+    if not record:
+        return make_response(jsonify(msg="incorrect token"), 401)
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return make_response(jsonify(msg="user not token"), 401)
+    user.password = generate_password_hash(password)
+    db.session.commit()
+
+    return make_response(jsonify(msg="reset successful"), 200)
 
 
 @app.route("/profile", methods=["GET"])
 @jwt_required()
 def profile():
-    print(get_jwt_identity())
     return make_response(jsonify(msg="profile"), 200)
 
 

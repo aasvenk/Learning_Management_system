@@ -13,3 +13,12 @@ class User(db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password, password)
+    
+    def verify_security_question(self, ans):
+        return self.security_answer == ans
+
+class PasswordRecovery(db.Model):
+    __tablename__ = 'password_recovery'
+    email = db.Column(db.String(120), unique=True, primary_key = True)
+    token = db.Column(db.Text)
+

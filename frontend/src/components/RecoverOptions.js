@@ -3,11 +3,14 @@ import "./RecoverOptions.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faArrowLeft}  from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom";
+import axios from "axios"
 
 function RecoverOptions() {
   let [option, setOption] = useState("recover");
   let [email, setEmail] = useState("")
   let [emailError, setEmailError] = useState("")
+  let [errorMsg, setErrorMsg] = useState("")
+  let [securityAnswer, setSecurityAnswer] = useState("")
 
   const validateEmail = (email) => {
     var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -16,6 +19,10 @@ function RecoverOptions() {
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
+  };
+
+  const handleSecurityAnswerChange = (event) => {
+    setSecurityAnswer(event.target.value);
   };
 
   const clearForm = () => {
@@ -47,6 +54,25 @@ function RecoverOptions() {
     return true
   }
 
+  const handleSecurityRecovery = () => {
+    axios
+    .post('/recoverPassword', {
+      'type': 'using_security_question',
+      'email': email,
+      'security_answer': securityAnswer
+    })
+    .then((response) => {
+      let {reset_url} = response.data
+      if (reset_url !== "") {
+        window.location.assign(reset_url)
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+
+  }
+
   let toRender;
   if (option === "using-security") {
     toRender = (
@@ -62,8 +88,9 @@ function RecoverOptions() {
             type="text"
             id="security-answer"
             placeholder="Enter answer"
+            onChange={handleSecurityAnswerChange}
           />
-          <button>Recover</button>
+          <button onClick={handleSecurityRecovery}>Recover</button>
         </div>
       </div>
     );
@@ -137,7 +164,12 @@ function RecoverOptions() {
     );
   }
   return (
-    <div>{toRender}</div>
+    <div>
+      {errorMsg && (
+        <div className="error-message">{errorMsg}</div>
+      )}
+      {toRender}
+    </div>
   );
 }
 

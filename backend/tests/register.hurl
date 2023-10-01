@@ -5,8 +5,8 @@ POST http://localhost:8000/register
   "password2": "test",
   "firstName": "Nikhil",
   "lastName": "Vemula",
-  "secQuestion": "What is the name of your pet?",
-  "secAnswer": "kabu"
+  "secQuestion": "What is your birth city?",
+  "secAnswer": "test"
 }
 
 HTTP 200

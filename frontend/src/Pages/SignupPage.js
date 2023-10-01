@@ -50,7 +50,7 @@ function SignupPage() {
         firstName: firstName,
         lastName: lastName,
         password: password,
-        secQuestion: 'What is your birth City?',
+        secQuestion: 'What is your birth city?',
         secAnswer: securityQuestion, 
       })
       .then((response) => {
