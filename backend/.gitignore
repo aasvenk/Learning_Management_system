@@ -1,3 +1,4 @@
 .flaskenv
 client_secret.json
+logs/*
 .DS_store
