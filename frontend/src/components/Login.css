@@ -53,7 +53,7 @@ span.required {
   box-sizing: border-box;
 }
 
-.login-page button {
+.login-page button.login {
   width: 100%;
   padding: 10px;
   background-color: #007bff;
@@ -84,36 +84,4 @@ button:hover {
   margin-bottom: 10px;
   font-size: 14px;
   font-weight: 400;
-}
-
-/* Login header */
-.login-header {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 65px;
-  padding-left: 2rem;
-  padding-right: 2rem;
-  background: rgb(255, 255, 255);
-  z-index: 2;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 3px;
-}
-
-.login-header .title{
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.login-header .signup-msg {
-  font-size: 14px;
-  margin-right: 10px;
-}
-
-.login-header .signup-link {
-  font-family: "Jetbrains Mono";
-  margin-right: 10px;
 }

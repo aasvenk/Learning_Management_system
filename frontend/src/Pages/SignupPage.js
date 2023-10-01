@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import  "./SignUpPage.css";
 import { Link } from "react-router-dom";
+import axios from "axios"
 
 function SignupPage() {
+  const [accountCreated, setAccountCreated] = useState(false)
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
@@ -41,89 +43,124 @@ function SignupPage() {
       setError("Passwords do not match.");
       return;
     }
-    alert("Signup successful!");
+
+    axios
+      .post("/register", {
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        password: password,
+        secQuestion: 'What is your birth city?',
+        secAnswer: securityQuestion, 
+      })
+      .then((response) => {
+        if (response.data.msg === "user created") {
+          setAccountCreated(true)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      });
   };
 
   return (
     <div>
-      <div className="Signup-header">
+    { !accountCreated &&
+      (<div>
+        <div className="Signup-header">
+          <Link to="/">
+            <span className="title">Hoosier Room</span>
+          </Link>
+        </div>
+        <div className = 'Sign-Up'>
+          <div className="signup-form">
+            <h1>Sign Up</h1>
+            {error && <div className="error-message">{error}</div>}
+            <div>
+              <label htmlFor="firstName">First Name</label>
+              <span className="required">*</span>
+              <input
+                type="text"
+                id="firstName"
+                placeholder= "Enter Your First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName">Last Name</label>
+              <span className="required">*</span>
+              <input
+                type="text"
+                id="lastName"
+                placeholder= "Enter Your Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="password">Password</label>
+              <span className="required">*</span>
+              <input
+                type="password"
+                id="password"
+                placeholder= "Enter Your Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="passwordRetype">Confirm your Password:</label>
+              <span className="required">*</span>
+              <input
+                type="password"
+                id="passwordRetype"
+                placeholder= "Retype your Password"
+                value={passwordRetype}
+                onChange={(e) => setPasswordRetype(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="email">Email</label>
+              <span className="required">*</span>
+              <input
+                type="email"
+                id="email"
+                placeholder= "Enter Your Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="securityQuestion">Security Question: What is your birth City?</label>
+              <span className="required">*</span>
+              <input
+                type="text"
+                id="securityQuestion"
+                placeholder= "Type your Birth Place"
+                value={securityQuestion}
+                onChange={(e) => setSecurityQuestion(e.target.value)}
+              />
+            </div>
+            <button onClick={handleSignup}>Sign Up</button>
+          </div>
+        </div>
+      </div>)}
+    {accountCreated && (
+      <div>
+        <div className="Signup-header">
         <Link to="/">
           <span className="title">Hoosier Room</span>
         </Link>
-      </div>
-      <div className = 'Sign-Up'>
-        <div className="signup-form">
-          <h1>Sign Up</h1>
-          {error && <div className="error-message">{error}</div>}
-          <div>
-            <label htmlFor="firstName">First Name</label>
-            <span className="required">*</span>
-            <input
-              type="text"
-              id="firstName"
-              placeholder= "Enter Your First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
+        </div>
+        <div className = 'Sign-Up'>
+          <div className="signup-form">
+            <h1>Account created successfully</h1>
+            <Link to={'/'}>Login</Link>
           </div>
-          <div>
-            <label htmlFor="lastName">Last Name</label>
-            <span className="required">*</span>
-            <input
-              type="text"
-              id="lastName"
-              placeholder= "Enter Your Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Password</label>
-            <span className="required">*</span>
-            <input
-              type="password"
-              id="password"
-              placeholder= "Enter Your Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="passwordRetype">Confirm your Password:</label>
-            <span className="required">*</span>
-            <input
-              type="password"
-              id="passwordRetype"
-              placeholder= "Retype your Password"
-              value={passwordRetype}
-              onChange={(e) => setPasswordRetype(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email</label>
-            <span className="required">*</span>
-            <input
-              type="email"
-              id="email"
-              placeholder= "Enter Your Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="securityQuestion">Security Question: What is your birth City?</label>
-            <span className="required">*</span>
-            <input
-              type="text"
-              id="securityQuestion"
-              placeholder= "Type your Birth Place"
-              value={securityQuestion}
-              onChange={(e) => setSecurityQuestion(e.target.value)}
-            />
-          </div>
-          <button onClick={handleSignup}>Sign Up</button>
         </div>
       </div>
+    )}
     </div>
     );
 }

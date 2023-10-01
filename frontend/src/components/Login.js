@@ -1,12 +1,15 @@
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import axios from "axios";
-import "./LoginPage.css";
-import AppHeader from "../components/AppHeader";
+import { useDispatch } from 'react-redux'
+import { setLoggedIn, setToken} from '../slices/userSlice'
+import "./Login.css"
+import SocialConnections from "./SocialConnections";
 
-axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
-function LoginPage() {
+function Login() {
+  const dispatch = useDispatch()
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
@@ -45,7 +48,9 @@ function LoginPage() {
         password: password,
       })
       .then((response) => {
-        alert("Token: " + response.data.access_token);
+        let {access_token} = response.data
+        dispatch(setLoggedIn(true))
+        dispatch(setToken(access_token))
       })
       .catch((error) => {
         alert("Incorrect credentials");
@@ -53,10 +58,7 @@ function LoginPage() {
   };
 
   return (
-    <div>
-      <AppHeader />
-
-      <div className="login-page">
+    <div className="login-page">
         <div className="login-form">
           <h1>Login in to your account</h1>
           <div className="form-group">
@@ -88,15 +90,22 @@ function LoginPage() {
             )}
           </div>
           <div className="actions">
-            <button onClick={handleLogin}>Login</button>
+            <button className="login" onClick={handleLogin}>Login</button>
           </div>
+          <hr></hr>
+          <SocialConnections />
           <Link to="/forgot-password" id="forgot-password">
             Forgot password?
           </Link>
+          <p>
+            <span className="signup-msg">Don't have an account? </span>
+            <Link to="/signup" className="signup-link">
+              Sign up
+            </Link>
+          </p>
         </div>
-      </div>
     </div>
   );
 }
 
-export default LoginPage;
+export default Login;

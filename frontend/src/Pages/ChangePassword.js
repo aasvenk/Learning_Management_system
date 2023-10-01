@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppHeader from "../components/AppHeader";
 import "../Pages/ChangePassword.css"
+import axios from "axios"
 
 
 function ChangePassword() {
@@ -8,8 +9,17 @@ function ChangePassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
-
   const handleChangePassword = () => {
+    setError("")
+    const query = new URLSearchParams(window.location.search);
+    const email = query.get('email')
+    const recoveryToken = query.get('token')
+
+    if (!recoveryToken || !email) {
+      setError('No recovery token or email found')
+      return;
+    }
+
     if (!password || !confirmPassword) {
       setError("Enter all Mandatory Fields");
       return;
@@ -26,10 +36,21 @@ function ChangePassword() {
       return;
     }
 
-    setTimeout(() => {
-      alert("Password changed successfully.");
-      window.location.href = "/"; 
-    }, 1000);
+    axios
+    .post('/resetPassword', {
+      token: recoveryToken,
+      email: email,
+      password: password
+    })
+    .then((response) => {
+      let {msg} = response.data
+      if (msg === "reset successful") {
+        window.location.assign("/")
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
   };
 
   return (

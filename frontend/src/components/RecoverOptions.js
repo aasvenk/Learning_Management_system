@@ -3,11 +3,14 @@ import "./RecoverOptions.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faArrowLeft}  from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom";
+import axios from "axios"
 
 function RecoverOptions() {
   let [option, setOption] = useState("recover");
   let [email, setEmail] = useState("")
   let [emailError, setEmailError] = useState("")
+  let [errorMsg, setErrorMsg] = useState("")
+  let [securityAnswer, setSecurityAnswer] = useState("")
 
   const validateEmail = (email) => {
     var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -18,16 +21,17 @@ function RecoverOptions() {
     setEmail(event.target.value);
   };
 
+  const handleSecurityAnswerChange = (event) => {
+    setSecurityAnswer(event.target.value);
+  };
+
   const clearForm = () => {
-    console.log("clear")
     setEmail('')
     setOption('recover')
   }
 
   const handleRecoveryType = () => {
     setEmailError("");
-
-    console.log(email)
 
     let isFormValid = true;
     if (email.trim() === "") {
@@ -47,6 +51,43 @@ function RecoverOptions() {
     return true
   }
 
+  const handleSecurityRecovery = () => {
+    axios
+    .post('/recoverPassword', {
+      'type': 'using_security_question',
+      'email': email,
+      'security_answer': securityAnswer
+    })
+    .then((response) => {
+      let {reset_url} = response.data
+      if (reset_url !== "") {
+        window.location.assign(reset_url)
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+  }
+
+  const handleEmailRecovery = () => {
+    console.log("hello")
+    axios
+    .post('/recoverPassword', {
+      'type': 'using_email',
+      'email': email,
+    })
+    .then((response) => {
+      let {msg} = response.data
+      if (msg === "email sent") {
+        console.log("email sent")
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+    return true
+  }
+
   let toRender;
   if (option === "using-security") {
     toRender = (
@@ -62,8 +103,9 @@ function RecoverOptions() {
             type="text"
             id="security-answer"
             placeholder="Enter answer"
+            onChange={handleSecurityAnswerChange}
           />
-          <button>Recover</button>
+          <button onClick={handleSecurityRecovery}>Recover</button>
         </div>
       </div>
     );
@@ -76,7 +118,7 @@ function RecoverOptions() {
           </span>
           <h1>Email</h1>
           <p>
-            A recovery link has been sent to your email. Please follow the instructions.
+            A recovery link will be sent to your email. Please follow the instructions.
             <br/>
             <br/>
             <Link to={"/"}>Go home</Link>
@@ -128,7 +170,7 @@ function RecoverOptions() {
           <label>How do you want to recover?</label>
             <div className="recover-options">
               <button onClick={(e)=> {handleRecoveryType() && setOption('using-security')}}>Security question</button>
-              <button onClick={(e)=> {handleRecoveryType() && setOption('using-email')}}>Email</button>
+              <button onClick={(e)=> {handleRecoveryType() && handleEmailRecovery() && setOption('using-email')}}>Email</button>
               <button onClick={(e)=> {handleRecoveryType() && setOption('using-otp')}}>OTP</button>
             </div>
           </div>
@@ -137,7 +179,12 @@ function RecoverOptions() {
     );
   }
   return (
-    <div>{toRender}</div>
+    <div>
+      {errorMsg && (
+        <div className="error-message">{errorMsg}</div>
+      )}
+      {toRender}
+    </div>
   );
 }
 
