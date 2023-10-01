@@ -3,8 +3,8 @@ import { createSlice } from '@reduxjs/toolkit'
 export const userSlice = createSlice({
   name: 'user',
   initialState: {
-    isLoggedIn: localStorage.getItem("token") !== "",
-    token: localStorage.getItem("token")
+    isLoggedIn: !!localStorage.getItem("hoosier_room_token"),
+    token: localStorage.getItem("hoosier_room_token")
   },
   reducers: {
     setLoggedIn: (state, action) => {
@@ -12,7 +12,7 @@ export const userSlice = createSlice({
     },
     setToken: (state, action) => {
       state.token = action.payload
-      localStorage.setItem("token", action.payload)
+      localStorage.setItem("hoosier_room_token", action.payload)
     },
     setUserInfo: (state, action) => {
       let {firstName, lastName} = action.payload

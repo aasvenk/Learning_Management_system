@@ -43,9 +43,9 @@ curl http://127.0.0.1:8080
 
 ## Production setup
 ```
-gunicorn -w 4 'api:api'
+gunicorn -c gunicorn_conf.py -w 4 'app:app'
 # Run in background
-gunicorn -w 4 'api:api' --daemon
+gunicorn -c gunicorn_conf.py -w 4 'app:app' --daemon
 pkill gunicorn
 ```
 

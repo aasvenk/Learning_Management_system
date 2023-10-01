@@ -8,7 +8,7 @@ function Welcome() {
     axios
       .get("/userInfo", {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')
         }
       })
       .then((response) => {
