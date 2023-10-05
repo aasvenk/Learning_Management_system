@@ -1,5 +1,12 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from enum import Enum
+
+
+class UserRole(Enum):
+    ADMIN = 'admin'
+    INSTRUCTOR = 'instructor'
+    STUDENT = 'student'
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -10,6 +17,7 @@ class User(db.Model):
     lastName = db.Column(db.String(120))
     security_question = db.Column(db.String(120))
     security_answer = db.Column(db.String(120))
+    role = db.Column(db.Enum(UserRole), default=UserRole.STUDENT)
 
     def verify_password(self, password):
         return check_password_hash(self.password, password)

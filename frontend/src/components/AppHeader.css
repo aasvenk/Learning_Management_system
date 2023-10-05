@@ -29,3 +29,19 @@
   font-family: "Jetbrains Mono";
   margin-right: 10px;
 }
+.title-container {
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  font-size: 18px;
+}
+
+.user-role {
+  margin-left: 10px;
+  font-weight: bold;
+  font-size: 25px;
+  color: red;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}

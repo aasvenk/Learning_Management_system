@@ -187,10 +187,20 @@ def get_user_info():
         "userInfo": {
             "firstName": user.firstName,
             "lastName": user.lastName,
+            "role" : convert_user_role(str(user.role)),
         }
     }
 
     return make_response(jsonify(response), 200)
+
+def convert_user_role(role_str):
+    if role_str == 'UserRole.STUDENT':
+        return 'Student'
+    if role_str == 'UserRole.ADMIN':
+        return 'Admin'
+    if role_str == 'UserRole.INSTRUCTOR':
+        return 'Instructor'
+    return role_str
 
 
 def create_reset_url(email):

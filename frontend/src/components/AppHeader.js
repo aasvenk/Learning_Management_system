@@ -9,6 +9,9 @@ import axios from "axios"
 function AppHeader() {
   const dispatch = useDispatch()
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
+  const userInfo = useSelector((state) => state.user.userInfo)
+
+
   const handleLogout = () => {
       axios
       .get("/logout", {
@@ -26,14 +29,20 @@ function AppHeader() {
   }
   return (
     <div className="login-header">
-      <Link to="/">
-        <span className="title">Hoosier Room</span>
-      </Link>
+      <div className="title-container">
+        <Link to="/">
+          <span className="title">Hoosier Room</span>
+        </Link>
+        <span className="user-role">{userInfo.role}</span>
+      </div>
       <p>
-        { isLoggedIn && (<Button variant="contained" disableElevation onClick={handleLogout}>Logout</Button>)}
+        {isLoggedIn && (
+          <Button variant="contained" disableElevation onClick={handleLogout}>
+            Logout
+          </Button>
+        )}
       </p>
     </div>
-    
   );
 }
 
