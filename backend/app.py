@@ -12,6 +12,7 @@ from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity
 from flask_jwt_extended import unset_jwt_cookies, jwt_required, JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
+from functools import wraps
 
 import google
 from google.oauth2 import id_token
@@ -31,7 +32,7 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
 
-from models import User, PasswordRecovery
+from models import User, PasswordRecovery, Enrollment, Courses
 
 
 
@@ -47,6 +48,25 @@ flow = Flow.from_client_secrets_file(
     ],
     redirect_uri=Configuration.BACKEND_URL+"/auth/callback",
 )
+
+@jwt_required()
+def role_required(allowed_roles):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            user = get_jwt_identity()
+            
+            # Assuming you have a way to determine the user's role, e.g., current_user["role"]
+            user_role = user.role
+
+            if user_role not in allowed_roles:
+                return jsonify({"message": "Access denied. Insufficient role."}), 403
+
+            return fn(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 @app.route("/auth/google")
@@ -174,12 +194,173 @@ def create_token():
     response = {"access_token": access_token}
     return response
 
+@app.route('/courseInfo', methods=["GET"])
+@jwt_required()
+def get_course_info():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return make_response(jsonify(msg="user not found"), 401)
+    
+    userID = user.id
+    userRole = user.role
+
+    #If the user has the admin role he recieves all courseIDs
+    if userRole == "Admin":
+        enrollments = Enrollment.query.all()
+        course_ids = [enrollment.course_id for enrollment in enrollments]
+    else:
+        enrollments = Enrollment.query.filter_by(student_id=userID).all()
+        course_ids = [enrollment.course_id for enrollment in enrollments]
+
+    response = {
+    "courseInfo": {
+        "studentID": user.id,
+        "courseIDs": course_ids  
+    }
+}
+
+    return make_response(jsonify(response), 200)
+
+@app.route('/deleteCourse', methods=["DELETE"])
+#@role_required(["Admin"]) 
+@jwt_required()
+def deleteCourse():
+    courseID = request.json.get("courseID", None)
+
+    if courseID == "":
+        return {"msg": "Please verify courseID"}, 401
+    
+    enrollments = Enrollment.query.filter_by(course_id=courseID).all()
+    courses  = Courses.query.filter_by(id=courseID).all
+
+    if not enrollments or not courses:
+        return {"msg": "Could not find course."}, 401
+
+    for enrollment in enrollments:
+        db.session.delete(enrollment)
+    
+    for course in courses:
+        db.session.delete(course)
+
+    db.session.commit()
+    return make_response(jsonify(msg="Course Deleted"), 200)
+
+@app.route('/updateCourse', methods=["PUT"])
+#@role_required(["Admin","Instructor"]) 
+@jwt_required()
+def updateCourse():
+    courseID = request.json.get("courseID", None)
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
+    data = request.json
+
+    if role == "Instructor": 
+        if "name" in data or "description" in data:
+            course = Courses.query.filter_by(id=courseID).first()
+            if course:
+                # Assuming data contains 'name' and 'description' fields
+                update_data = {}
+
+                if "name" in data:
+                    update_data['name'] = data["name"]
+                else:
+                    # If 'name' is not in data, retain the current value from the database
+                    update_data['name'] = course.name
+
+                if "description" in data:
+                    update_data['description'] = data["description"]
+                else:
+                    # If 'description' is not in data, retain the current value from the database
+                    update_data['description'] = course.description
+
+                # Update the course with the new data
+                course.name = update_data['name']
+                course.description = update_data['description']
+
+                # Update records in the Enrollment model with the corresponding courseID
+                Enrollment.query.filter_by(course_id=courseID).update(update_data)
+        else:
+            return {"msg": "Please verify input fields."}, 401
+    
+    if role == "Instructor": 
+        if "name" in data or "description" in data or "number" in data or "instructor" in data:
+            course = Courses.query.filter_by(id=courseID).first()
+            if course:
+                # Assuming data contains 'name' and 'description' fields
+                update_data = {}
+
+                if "name" in data:
+                    update_data['name'] = data["name"]
+                else:
+                    # If 'name' is not in data, retain the current value from the database
+                    update_data['name'] = course.name
+
+                if "description" in data:
+                    update_data['description'] = data["description"]
+                else:
+                    # If 'description' is not in data, retain the current value from the database
+                    update_data['description'] = course.description
+                
+                if "number" in data:
+                    update_data['number'] = data["number"]
+                else:
+                    # If 'description' is not in data, retain the current value from the database
+                    update_data['number'] = course.number
+                
+                if "instructor" in data:
+                    update_data['instructor'] = data["instructor"]
+                else:
+                    # If 'description' is not in data, retain the current value from the database
+                    update_data['instructor'] = course.instructor
+                
+                # Update the course with the new data
+                course.name = update_data['name']
+                course.description = update_data['description']
+                course.number = update_data['number']
+                course.number = update_data['instructor']
+
+                # Update records in the Enrollment model with the corresponding courseID
+                Enrollment.query.filter_by(course_id=courseID).update(update_data)
+        else:
+            return {"msg": "Please verify input fields."}, 401
+
+
+    
+
+    db.session.commit()
+    return make_response(jsonify(msg="Course Updated"), 200)
+
+@app.route('/updateStudents', methods=["PUT"])
+#@role_required(["Admin","Instructor"]) 
+@jwt_required()
+def updateStudents():
+    courseID = request.json.get("courseID", None)
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
+    data = request.json
+
+    #ToDo Need to write an update function for the Enrollments model
+    #Need to discuss how to map teachers to their courses
+
+
+    
+
+    db.session.commit()
+    return make_response(jsonify(msg="Course Updated"), 200)
+
+
+
 
 @app.route('/userInfo', methods=["GET"])
 @jwt_required()
 def get_user_info():
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
     if not user:
         return make_response(jsonify(msg="user not found"), 401)
     
@@ -187,7 +368,7 @@ def get_user_info():
         "userInfo": {
             "firstName": user.firstName,
             "lastName": user.lastName,
-            "role" : convert_user_role(str(user.role)),
+            "role" : role,
         }
     }
 
@@ -278,7 +459,6 @@ def profile():
 
 
 @app.route("/logout", methods=["GET"])
-@jwt_required()
 def logout():
     session.clear()
     response = jsonify({"msg": "logout successful"})
