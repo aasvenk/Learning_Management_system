@@ -31,7 +31,7 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
 
-from models import User, PasswordRecovery
+from models import User, PasswordRecovery, Announcements, Courses
 
 
 
@@ -148,7 +148,6 @@ def register():
     )
     db.session.commit()
     return make_response(jsonify(msg="user created"), 200)
-
 
 @app.route('/login', methods=["POST"])
 def create_token():
@@ -281,6 +280,50 @@ def send_mail(toMail, subject, body):
     msg.body = body
     mail.send(msg)
 
+# Announcements
+'''
+@role admin, instructor
+
+@parm courseid
+@parm title
+@parm description
+Returns {status: "success/failure", error: "message"}
+'''
+@app.route("/announcements/create", methods=["POST"])
+@jwt_required()
+def create_annoucement():
+    data = request.json
+    courseId = data["courseId"]
+    title = data["title"]
+    description = data["description"]
+    announcement = Announcements(course_id=courseId, title=title, description=description)
+    try:
+        db.session.add(announcement)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+
+    return make_response(jsonify(status="success", error=""), 200)
+
+'''
+@role student, admin, instructor
+
+@parm courseid
+Returns annoucements for a given course
+'''
+@app.route("/announcements/<courseid>", methods=["GET"])
+@jwt_required()
+def get_annoucements(courseid):
+    # TODO: Verify user has right role from the jwt token
+    announcements = Announcements.query.filter_by(course_id=courseid).all()
+    response = []
+    for a in announcements:
+        response.append({
+            "id": a.id,
+            "title": a.title,
+            "description": a.description
+        })
+    return make_response(jsonify(status="success", announcements=response), 200)
 
 @app.cli.command('resetdb')
 def resetdb_command():
@@ -295,4 +338,22 @@ def resetdb_command():
         create_database(DB_URL)
     print('Creating tables.')
     db.create_all()
+
+    # Add demo data
+    db.session.add(
+        User(
+            email="test@iu.edu", 
+            password=generate_password_hash("test"), 
+            firstName="Test",
+            lastName="Test",
+            security_question="What is your birth city?",
+            security_answer="test"
+        )
+    )
+    db.session.add(
+        Courses(
+            title="Course 1"
+        )
+    )
+    db.session.commit()
     print('Shiny!')

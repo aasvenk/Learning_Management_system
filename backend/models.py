@@ -17,6 +17,19 @@ class User(db.Model):
     def verify_security_question(self, ans):
         return self.security_answer == ans
 
+class Courses(db.Model):
+    __tablename__ = 'courses'
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String(20))
+
+
+class Announcements(db.Model):
+    __tablename__ = 'announcements'
+    id = db.Column(db.Integer, primary_key = True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    title = db.Column(db.String(120))
+    description = db.Column(db.String(120))
+
 class PasswordRecovery(db.Model):
     __tablename__ = 'password_recovery'
     email = db.Column(db.String(120), unique=True, primary_key = True)
