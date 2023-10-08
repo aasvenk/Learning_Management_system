@@ -11,6 +11,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import TestPage from "./Pages/TestPage";
 
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
@@ -24,6 +25,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path = "/resetpassword" element = {<ChangePassword />} />
+        <Route path = "/test" element = {<TestPage />} />
       </Routes>
     </Router>
   );
