@@ -31,7 +31,7 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
 
-from models import User, PasswordRecovery, Announcements, Courses
+from models import User, PasswordRecovery, Announcements
 
 
 
@@ -348,11 +348,6 @@ def resetdb_command():
             lastName="Test",
             security_question="What is your birth city?",
             security_answer="test"
-        )
-    )
-    db.session.add(
-        Courses(
-            title="Course 1"
         )
     )
     db.session.commit()

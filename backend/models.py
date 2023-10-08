@@ -17,12 +17,6 @@ class User(db.Model):
     def verify_security_question(self, ans):
         return self.security_answer == ans
 
-class Courses(db.Model):
-    __tablename__ = 'courses'
-    id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(20))
-
-
 class Announcements(db.Model):
     __tablename__ = 'announcements'
     id = db.Column(db.Integer, primary_key = True)
