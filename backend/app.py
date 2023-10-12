@@ -331,7 +331,7 @@ def updateCourse():
             return {"msg": "Please verify input fields."}, 401
     
     if role == "Admin": 
-        if "courseName" in data or "description" in data or "courseNumber" in data or "instructor" in data:
+        if "courseName" in data or "description" in data or "courseNumber" in data or "instructor_id" in data:
             course = Courses.query.filter_by(id=courseID).first()
             if course:
                 # Assuming data contains 'name' and 'description' fields
