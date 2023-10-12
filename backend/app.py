@@ -191,8 +191,8 @@ def get_course_info():
 
     #If the user has the admin role they recieves all courseIDs
     if role == "Admin":
-        enrollments = Enrollment.query.all()
-        course_ids = [enrollment.course_id for enrollment in enrollments]
+        courses = Courses.query.all()
+        course_ids = [course.id for course in enrollments]
 
     #If the user has instructor role they recieve all courses they are the instructor of
     if role == "Instructor":
