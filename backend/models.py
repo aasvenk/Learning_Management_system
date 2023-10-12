@@ -8,6 +8,25 @@ class UserRole(Enum):
     INSTRUCTOR = 'instructor'
     STUDENT = 'student'
 
+class EventType(Enum):
+    CLASS = 'Class'
+    DISCUSSION = 'Discussion'
+    LAB = 'Lab'
+
+    def as_string(self):
+        return self.value
+
+class Events(db.Model):
+    __tablename__ = 'events'
+    id = db.Column(db.Integer, primary_key=True)
+    eventName = db.Column(db.String(120))
+    event = db.Column(db.Enum(EventType), default=EventType.CLASS)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    repeating_weekly = db.Column(db.Boolean, default=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    course = db.relationship('Courses', foreign_keys=[course_id])
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key = True)
@@ -26,11 +45,13 @@ class User(db.Model):
         return self.security_answer == ans
 
 class Courses(db.Model):
-    __tablename__ = 'courses'
+    __tablename__ = 'courses'   
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(120), index=True, unique=True)
+    courseName = db.Column(db.String())
     courseNumber = db.Column(db.String())
-    instructor = db.Column(db.String(120))
+    instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    instructor = db.relationship('User', foreign_keys=[instructor_id])
 
 class Enrollment(db.Model):
     __tablename__ = 'enrollments'
@@ -38,8 +59,8 @@ class Enrollment(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
 
-    student = db.relationship('User', backref='enrollments')
-    course = db.relationship('Courses', backref='enrollments')
+    #student = db.relationship('User', backref='enrollments')
+    #course = db.relationship('Courses', backref='enrollments')
 
 class PasswordRecovery(db.Model):
     __tablename__ = 'password_recovery'

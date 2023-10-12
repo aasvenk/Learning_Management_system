@@ -32,7 +32,7 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
 
-from models import User, PasswordRecovery, Enrollment, Courses
+from models import User, UserRole, PasswordRecovery, Enrollment, Courses, Events,EventType
 
 
 
@@ -49,24 +49,6 @@ flow = Flow.from_client_secrets_file(
     redirect_uri=Configuration.BACKEND_URL+"/auth/callback",
 )
 
-@jwt_required()
-def role_required(allowed_roles):
-    def decorator(fn):
-        @wraps(fn)
-        def wrapper(*args, **kwargs):
-            user = get_jwt_identity()
-            
-            # Assuming you have a way to determine the user's role, e.g., current_user["role"]
-            user_role = user.role
-
-            if user_role not in allowed_roles:
-                return jsonify({"message": "Access denied. Insufficient role."}), 403
-
-            return fn(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 @app.route("/auth/google")
@@ -163,7 +145,8 @@ def register():
             firstName=firstName,
             lastName=lastName,
             security_question=secQuestion,
-            security_answer=secAnswer
+            security_answer=secAnswer,
+            role=UserRole.ADMIN
         )
     )
     db.session.commit()
@@ -204,13 +187,19 @@ def get_course_info():
         return make_response(jsonify(msg="user not found"), 401)
     
     userID = user.id
-    userRole = user.role
+    role = convert_user_role(str(user.role))
 
-    #If the user has the admin role he recieves all courseIDs
-    if userRole == "Admin":
+    #If the user has the admin role they recieves all courseIDs
+    if role == "Admin":
         enrollments = Enrollment.query.all()
         course_ids = [enrollment.course_id for enrollment in enrollments]
-    else:
+
+    #If the user has instructor role they recieve all courses they are the instructor of
+    if role == "Instructor":
+        courses = Courses.query.filter_by(instructor_id=userID).all()
+        course_ids = [course.id for course in courses]
+
+    if role == "Student":
         enrollments = Enrollment.query.filter_by(student_id=userID).all()
         course_ids = [enrollment.course_id for enrollment in enrollments]
 
@@ -223,23 +212,75 @@ def get_course_info():
 
     return make_response(jsonify(response), 200)
 
+@app.route('/createCourse', methods=["POST"])
+@jwt_required()
+def createCourse():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
+
+    if role == "Student" or role == "Instructor":
+        return {"msg": "You do not have the appropriate role to perform these actions"}, 401
+
+    data = request.json
+
+    if "description" not in data or not data["description"]:
+        return jsonify({"message": "Description is required"}), 400
+
+    if "courseNumber" not in data or not data["courseNumber"]:
+        return jsonify({"message": "Course number is required"}), 400
+
+    if "instructorID" not in data or not data["instructorID"]:
+        return jsonify({"message": "Instructor ID is required"}), 400
+    
+    if "courseName" not in data or not data["courseName"]:
+        return jsonify({"message": "Course name is required"}), 400
+    
+    description = data["description"]
+    courseNumber = data["courseNumber"]
+    instructorID = data["instructorID"]
+    courseName = data["courseName"]
+
+    instructor = User.query.filter_by(id=instructorID).first()
+
+    if not instructor:
+        return jsonify({"message": "Invalid Instructor ID"}), 400
+    
+    
+    new_course = Courses(description=description, courseName=courseName, courseNumber=courseNumber, instructor_id=instructorID)
+    db.session.add(new_course)
+
+    db.session.commit()
+    return make_response(jsonify(msg="Course Created"), 200)
+
 @app.route('/deleteCourse', methods=["DELETE"])
-#@role_required(["Admin"]) 
 @jwt_required()
 def deleteCourse():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
     courseID = request.json.get("courseID", None)
+    role = convert_user_role(str(user.role))
 
+    if role == "Student" or role == "Instructor":
+        return {"msg": "You do not have the appropriate role to perform these actions"}, 401
+    
     if courseID == "":
         return {"msg": "Please verify courseID"}, 401
     
     enrollments = Enrollment.query.filter_by(course_id=courseID).all()
-    courses  = Courses.query.filter_by(id=courseID).all
 
-    if not enrollments or not courses:
+    courses = Courses.query.filter_by(id=courseID).all()
+
+    if not courses:
         return {"msg": "Could not find course."}, 401
 
-    for enrollment in enrollments:
-        db.session.delete(enrollment)
+    #Uncomment when adding students and removing students from enrollment APIs are created
+
+    #if not enrollments or not courses:
+        #return {"msg": "Could not find course."}, 401
+
+    #for enrollment in enrollments:
+        #db.session.delete(enrollment)
     
     for course in courses:
         db.session.delete(course)
@@ -248,7 +289,6 @@ def deleteCourse():
     return make_response(jsonify(msg="Course Deleted"), 200)
 
 @app.route('/updateCourse', methods=["PUT"])
-#@role_required(["Admin","Instructor"]) 
 @jwt_required()
 def updateCourse():
     courseID = request.json.get("courseID", None)
@@ -257,46 +297,51 @@ def updateCourse():
     role = convert_user_role(str(user.role))
     data = request.json
 
+
+    if not courseID:
+        return {"msg": "No courseID specified."}, 401
+
+    if role == "Student":
+        return {"msg": "Students cannot update courses."}, 401
+
     if role == "Instructor": 
-        if "name" in data or "description" in data:
+        if "courseName" in data or "description" in data:
             course = Courses.query.filter_by(id=courseID).first()
             if course:
-                # Assuming data contains 'name' and 'description' fields
+                
                 update_data = {}
 
-                if "name" in data:
-                    update_data['name'] = data["name"]
+                if "courseName" in data:
+                    update_data['courseName'] = data["courseName"]
                 else:
-                    # If 'name' is not in data, retain the current value from the database
-                    update_data['name'] = course.name
+                    
+                    update_data['courseName'] = course.courseName
 
                 if "description" in data:
                     update_data['description'] = data["description"]
                 else:
-                    # If 'description' is not in data, retain the current value from the database
+                    
                     update_data['description'] = course.description
 
-                # Update the course with the new data
-                course.name = update_data['name']
+                course.name = update_data['courseName']
                 course.description = update_data['description']
 
-                # Update records in the Enrollment model with the corresponding courseID
-                Enrollment.query.filter_by(course_id=courseID).update(update_data)
+                Courses.query.filter_by(id=courseID).update(update_data)
         else:
             return {"msg": "Please verify input fields."}, 401
     
-    if role == "Instructor": 
-        if "name" in data or "description" in data or "number" in data or "instructor" in data:
+    if role == "Admin": 
+        if "courseName" in data or "description" in data or "courseNumber" in data or "instructor" in data:
             course = Courses.query.filter_by(id=courseID).first()
             if course:
                 # Assuming data contains 'name' and 'description' fields
                 update_data = {}
 
-                if "name" in data:
-                    update_data['name'] = data["name"]
+                if "courseName" in data:
+                    update_data['courseName'] = data["courseName"]
                 else:
                     # If 'name' is not in data, retain the current value from the database
-                    update_data['name'] = course.name
+                    update_data['courseName'] = course.courseName
 
                 if "description" in data:
                     update_data['description'] = data["description"]
@@ -304,31 +349,29 @@ def updateCourse():
                     # If 'description' is not in data, retain the current value from the database
                     update_data['description'] = course.description
                 
-                if "number" in data:
-                    update_data['number'] = data["number"]
+                if "courseNumber" in data:
+                    update_data['courseNumber'] = data["courseNumber"]
                 else:
                     # If 'description' is not in data, retain the current value from the database
-                    update_data['number'] = course.number
+                    update_data['courseNumber'] = course.courseNumber
                 
                 if "instructor" in data:
-                    update_data['instructor'] = data["instructor"]
+                    update_data['instructor_id'] = data["instructor_id"]
                 else:
                     # If 'description' is not in data, retain the current value from the database
-                    update_data['instructor'] = course.instructor
+                    update_data['instructor_id'] = course.instructor_id
+                
                 
                 # Update the course with the new data
-                course.name = update_data['name']
+                course.name = update_data['courseName']
                 course.description = update_data['description']
-                course.number = update_data['number']
-                course.number = update_data['instructor']
+                course.courseNumber = update_data['courseNumber']
+                course.instructor_id = update_data['instructor_id']
 
-                # Update records in the Enrollment model with the corresponding courseID
-                Enrollment.query.filter_by(course_id=courseID).update(update_data)
+                # Update records in the Courses model with the corresponding courseID
+                Courses.query.filter_by(id=courseID).update(update_data)
         else:
             return {"msg": "Please verify input fields."}, 401
-
-
-    
 
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
@@ -343,8 +386,10 @@ def updateStudents():
     role = convert_user_role(str(user.role))
     data = request.json
 
+    if role == "Student":
+        return {"msg": "Students cannot update courses."}, 401
+    
     #ToDo Need to write an update function for the Enrollments model
-    #Need to discuss how to map teachers to their courses
 
 
     
@@ -352,6 +397,122 @@ def updateStudents():
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
 
+@app.route('/courseEvents', methods=["GET"])
+@jwt_required()
+def getEventsForCourse():
+    data = request.json
+    courseID = data["courseID"]
+
+    events = Events.query.filter_by(course_id=courseID).all()
+
+    if not events:
+        return make_response(jsonify(msg="No events found for the specified courseID"), 401)
+    
+    
+    event_data = [{'event_name': event.eventName, 'event_type': event.event.as_string(), 'event_id': event.id, 'start_time': event.start_time, 'end_time': event.end_time} for event in events]
+
+    response = {
+    "courseInfo": {
+        "eventData": event_data
+    }
+}
+    return make_response(jsonify(response), 200)
+@app.route('/deleteEvent', methods=["DELETE"])
+@jwt_required()
+def deleteEvent():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    data = request.json
+    eventID = data["eventID"]
+    role = convert_user_role(str(user.role))
+
+    if role == "Student":
+        return {"msg": "Students cannot update events."}, 401
+
+    if eventID == "":
+        return {"msg": "Please verify eventID"}, 401
+    
+    event = Events.query.filter_by(id=eventID).first()
+
+    if not event:
+        return {"msg": "Could not find Event."}, 401
+
+    eventCourseID = event.course_id
+
+    
+    eventCourse = Courses.query.filter_by(id=eventCourseID).first()
+
+    if not eventCourse:
+        return {"msg": "Course ID of event is incorrect"}, 401
+
+    eventCourseInstructor = eventCourse.instructor
+
+    if eventCourseInstructor.id != user.id and role == "Instructor":
+        return {"msg": "You do not teach this course."}, 401
+
+    db.session.delete(event)
+
+    db.session.commit()
+    return make_response(jsonify(msg="Event Deleted"), 200)
+
+@app.route('/createEvent', methods=["POST"])
+@jwt_required()
+def createEvent():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    data = request.json
+    eventName = data["eventName"]
+    eventType = data["eventType"]
+    courseID = data["courseID"]
+    startTime_str = data["startTime"]
+    endTime_str = data["endTime"]
+    repeating = data.get("repeating", None)
+    role = convert_user_role(str(user.role))
+
+    if role == "Student":
+        return {"msg": "Students cannot create events."}, 401
+    
+    required_params = ["eventName", "eventType", "courseID", "startTime", "endTime"]
+
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    try:
+        startTime = datetime.fromisoformat(startTime_str)
+        endTime = datetime.fromisoformat(endTime_str)
+    except ValueError:
+        return {"msg": "Invalid date-time format for startTime or endTime."}, 400
+    
+    course = Courses.query.get(courseID)
+    
+    if not course:
+        return {"msg": "Course not found."}, 401
+    
+    courseInstructor = course.instructor
+    
+    if courseInstructor.id != user.id and role != "Admin":
+        return {"msg": "You do not teach this course."}, 401
+    
+    eventTypeObj = string_to_event_type(eventType)
+
+    if repeating:
+        if repeating.lower() == "true":
+            new_event = Events(eventName=eventName, event=eventTypeObj, start_time=startTime,
+                       end_time=endTime, repeating_weekly=True, course=course)
+        else:
+            new_event = Events(eventName=eventName, event=eventTypeObj, start_time=startTime,
+                       end_time=endTime, repeating_weekly=False, course=course)
+            
+    else:
+        new_event = Events(eventName=eventName, event=eventTypeObj, start_time=startTime,
+                       end_time=endTime, course=course)
+
+    db.session.add(new_event)
+
+    db.session.commit()
+    return make_response(jsonify(msg="Event Created"), 200)
 
 
 
@@ -382,6 +543,13 @@ def convert_user_role(role_str):
     if role_str == 'UserRole.INSTRUCTOR':
         return 'Instructor'
     return role_str
+
+
+def string_to_event_type(event_type_str):
+    try:
+        return EventType[event_type_str]
+    except KeyError:
+        raise ValueError(f"Invalid event type: {event_type_str}")
 
 
 def create_reset_url(email):
