@@ -9,8 +9,14 @@ jsonpath "$.access_token" exists
 [Captures]
 access_token: jsonpath "$.access_token"
 
-GET http://localhost:8000/userInfo
+
+POST http://localhost:8000/announcements/create
 Authorization: Bearer {{access_token}}
+{
+  "courseId": "1",
+  "title": "title",
+  "description": "this is announcement description"
+}
 HTTP 200
 [Asserts]
-jsonpath "$.userInfo" exists
+jsonpath "$.status" exists

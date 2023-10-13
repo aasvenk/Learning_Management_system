@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import SignupPage from "./Pages/SignupPage";
 import ForgotPassword from "./Pages/ForgotPasswordPage/ForgotPasswordPage";
 import ChangePassword from  "./Pages/ChangePassword"
+import CoursePage from  "./Pages/CoursePage/CoursePage"
 import HomePage from "./Pages/HomePage";
 import axios from "axios"
 import LoggedIn from './components/LoggedIn'
@@ -26,6 +27,8 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path = "/resetpassword" element = {<ChangePassword />} />
         <Route path = "/test" element = {<TestPage />} />
+
+        <Route path = "/course/:id" element = {<CoursePage />} />
       </Routes>
     </Router>
   );

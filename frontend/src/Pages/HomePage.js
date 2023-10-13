@@ -3,7 +3,7 @@ import "./HomePage.css";
 import AppHeader from "../components/AppHeader";
 import { useSelector} from 'react-redux'
 import Login from "../components/Login";
-import Welcome from "../components/Welcome";
+import DashboardPage from "./DashboardPage";
 
 function HomePage() {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
@@ -13,7 +13,7 @@ function HomePage() {
       <AppHeader />
       <div className="page-container">
         {!isLoggedIn && <Login />}
-        {isLoggedIn && <Welcome />}
+        {isLoggedIn && <DashboardPage />}
       </div>
     </div>
   );
