@@ -485,4 +485,16 @@ def resetdb_command():
         create_database(DB_URL)
     print('Creating tables.')
     db.create_all()
+    # Add demo data
+    db.session.add(
+        User(
+            email="test@iu.edu", 
+            password=generate_password_hash("test"), 
+            firstName="Test",
+            lastName="Test",
+            security_question="What is your birth city?",
+            security_answer="test"
+        )
+    )
+    db.session.commit()
     print('Shiny!')

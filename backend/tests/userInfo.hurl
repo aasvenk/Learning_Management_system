@@ -1,6 +1,6 @@
 POST http://localhost:8000/login
 {
-  "email": "srvemu@iu.edu",
+  "email": "test@iu.edu",
   "password": "test"
 }
 HTTP 200
