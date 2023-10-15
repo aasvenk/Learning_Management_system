@@ -14,50 +14,50 @@ function CourseList() {
     {
       title: "Course 1",
       description:
-        "long descrption long descrption long descrption long descrption long descrption",
+        "long descrption long descrption long descrption long descrption long descrption 1 ",
       courseNumber: "B505",
     },
     {
-      title: "Course 1",
+      title: "Course 2",
       description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+        "long descrption long descrption long descrption long descrption long descrption 2",
+      courseNumber: "B506",
     },
     {
-      title: "Course 1",
+      title: "Course 3",
       description:
         "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+      courseNumber: "B507",
     },
     {
-      title: "Course 1",
+      title: "Course 4",
       description:
         "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+      courseNumber: "B508",
     },
     {
-      title: "Course 1",
+      title: "Course 5",
       description:
         "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+      courseNumber: "B508",
     },
     {
-      title: "Course 1",
+      title: "Course 6",
       description:
         "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+      courseNumber: "B509",
     },
     {
-      title: "Course 1",
+      title: "Course 7",
       description:
         "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+      courseNumber: "B510",
     },
     {
-      title: "Course 1",
+      title: "Course 8",
       description:
         "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B505",
+      courseNumber: "B511",
     },
   ];
   return (
@@ -79,13 +79,13 @@ function CourseList() {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" onClick={() => navigate("/course/1")}>Open</Button>
+              <Button size="small" onClick={() => navigate("/course/{course.courseNumber}}")}>Open</Button>
             </CardActions>
           </Card>
         );
       })}
     </Box>
+
   );
 }
-
 export default CourseList;
