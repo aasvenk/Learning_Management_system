@@ -11,7 +11,7 @@ brew install postgres@15
 ### Activate python environment
 
 ```
-source ./venv/bin/activate
+source ./.venv/bin/activate
 deactivate
 ```
 
