@@ -32,6 +32,8 @@ MAIL_USERNAME=
 MAIL_PASSWORD=
 ```
 
+### You can generate the secret keys using below code
+
 ```
 python -c 'import secrets; print(secrets.token_hex())'
 ```
