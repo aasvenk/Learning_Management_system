@@ -2,6 +2,11 @@
 
 ## Development setup
 
+## Install postgres
+
+```
+brew install postgres@15
+```
 
 ### Activate python environment
 
