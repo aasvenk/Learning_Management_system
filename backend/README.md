@@ -15,6 +15,7 @@ deactivate
 ```
 
 ### Create .env file
+**Check team channel for env files **
 ```
 SECRET_KEY=
 POSTGRES_USER=
