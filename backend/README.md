@@ -2,16 +2,17 @@
 
 ## Development setup
 
-### Install
-```
-pip install -r requirements.txt
-```
 
 ### Activate python environment
 
 ```
 source ./venv/bin/activate
 deactivate
+```
+
+### Install
+```
+pip install -r requirements.txt
 ```
 
 ### Create .env file
