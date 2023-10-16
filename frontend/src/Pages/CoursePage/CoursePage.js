@@ -7,6 +7,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import AppHeader from "../../components/AppHeader";
+import  "./CoursePage.css";
 
 
 function CoursePage() {
@@ -26,14 +27,28 @@ function CoursePage() {
   const course ={ 
     
     title : 'Course 1',
-    Description: "Descirption of course 1", 
-    Announcement :  "Course 1 Announcement" 
-
-
+    Description: "Descirption of course 1",  
   };
+
+  const Announcements = [
+    {
+      "id" : "1",
+      "title" : "Announcement 1",
+      "Description" : " Desctiption of Announcement 1"
+    },
+    {
+      "id" : "2",
+      "title" : "Announcement 2",
+      "Description" : " Desctiption of Announcement 2"
+    }
+  ];
+
   return (
     <div>
-      <div>
+      <div> 
+        <AppHeader />
+      </div>
+      <div className="course-page">
       <Paper elevation={2} style={{ padding: "10px" }}>
         <Box sx={{ width: "100%", typography: "body1" }}>
           <TabContext value={value}>
@@ -55,11 +70,15 @@ function CoursePage() {
           
             <TabPanel value="2">
               <div>
-               <h1> Please see the below annoucements </h1>
-              </div>
-              <div>
-              {course.Announcement} </div></TabPanel>
-  
+                  {Announcements.map((announcement, i) => { 
+                    return (
+                      <div key={i} className="Announcement">
+                        <h1>{announcement.title} </h1>
+                        <div>{announcement.Description}</div>
+                      </div>
+                    );
+                  })}
+               </div></TabPanel>
           </TabContext>
         </Box>
       </Paper>
