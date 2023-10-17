@@ -1,4 +1,4 @@
-from flask import Blueprint, request, make_response, jsonify, session, redirect
+from flask import Blueprint, request, make_response, jsonify, session
 from werkzeug.security import generate_password_hash
 from flask_jwt_extended import create_access_token, unset_jwt_cookies
 import secrets
