@@ -6,60 +6,29 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Box from '@mui/material/Box';
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios"
 
 function CourseList() {
+  const [courses, setCourses] = useState([])
   const navigate = useNavigate();
 
-  const courses = [
-    {
-      title: "Course 1",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption 1 ",
-      courseNumber: "B505",
-    },
-    {
-      title: "Course 2",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption 2",
-      courseNumber: "B506",
-    },
-    {
-      title: "Course 3",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B507",
-    },
-    {
-      title: "Course 4",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B508",
-    },
-    {
-      title: "Course 5",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B508",
-    },
-    {
-      title: "Course 6",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B509",
-    },
-    {
-      title: "Course 7",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B510",
-    },
-    {
-      title: "Course 8",
-      description:
-        "long descrption long descrption long descrption long descrption long descrption",
-      courseNumber: "B511",
-    },
-  ];
+  useEffect(() => {
+    axios
+    .get("/courseInfo", {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')
+      }
+    })
+    .then((response) => {
+      const {courseInfo} = response.data
+      setCourses(courseInfo)
+    })
+    .catch((error) => {
+      console.error(error)
+    });
+  }, [])
+
   return (
     <Box sx={{ display: 'flex',
     flexWrap: 'wrap'}}>
@@ -72,14 +41,14 @@ function CourseList() {
             />
             <CardContent>
               <Typography gutterBottom variant="h5" component="div">
-                {course.title}
+                {course.course_name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {course.description}
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" onClick={() => navigate("/course/{course.courseNumber}}")}>Open</Button>
+              <Button size="small" onClick={() => navigate("/course/" + course.id)}>Open</Button>
             </CardActions>
           </Card>
         );

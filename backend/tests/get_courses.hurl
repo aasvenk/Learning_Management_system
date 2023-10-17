@@ -1,7 +1,7 @@
 POST http://localhost:8000/login
 {
-  "email": "test@iu.edu",
-  "password": "test"
+  "email": "student@iu.edu",
+  "password": "acnnn@student"
 }
 HTTP 200
 [Asserts]
@@ -9,9 +9,8 @@ jsonpath "$.access_token" exists
 [Captures]
 access_token: jsonpath "$.access_token"
 
-
-GET http://localhost:8000/announcements/101
+GET http://localhost:8000/courseInfo
 Authorization: Bearer {{access_token}}
 HTTP 200
 [Asserts]
-jsonpath "$.status" exists
+jsonpath "$.courseInfo" exists

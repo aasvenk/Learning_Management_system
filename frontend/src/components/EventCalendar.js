@@ -13,6 +13,9 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import axios from 'axios';
+import { useParams } from "react-router-dom";
+
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -23,38 +26,38 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 // Takes course id as input
 function EventCalendar() {
   const [events, setEvents] = useState([])
+  const { id } = useParams()
+
   const dateChanged = (newDate) => {
-    console.log(dayjs(newDate).toISOString());
-    setEvents([
-      {
-        "id": 1,
-        "title": "Title 1",
-        "description": "Description 1"
+    const dateStr = dayjs(newDate).format('YYYY-MM-DD')
+    console.log(dateStr)
+
+    axios
+    .post("/events/" + id, {q_date: dateStr}, {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')
       },
-      {
-        "id": 2,
-        "title": "Title 2",
-        "description": "Description 2"
-      },
-      {
-        "id": 3,
-        "title": "Title 3",
-        "description": "Description 3"
-      }
-    ])
+    })
+    .then((response) => {
+      const {events} = response.data
+      setEvents(events)
+    })
+    .catch((error) => {
+      console.error(error)
+    });
   };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container spacing={{ xs: 1, md: 1 }}>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={4}>
           <StyledPaper>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateCalendar onChange={dateChanged} />
             </LocalizationProvider>
           </StyledPaper>
         </Grid>
-        <Grid item xs={12} md={9}>
+        <Grid item xs={12} md={8}>
           <StyledPaper>
             <h1>Events</h1>
             <TableContainer>
@@ -62,19 +65,21 @@ function EventCalendar() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Title</TableCell>
-                    <TableCell>Description</TableCell>
+                    <TableCell>Start time</TableCell>
+                    <TableCell>End time</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {events.map((row) => (
+                  {events.map((row, index) => (
                     <TableRow
                       key={row.id}
                       sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
                       <TableCell component="th" scope="row">
-                        {row.title}
+                        {row.name}
                       </TableCell>
-                      <TableCell>{row.description}</TableCell>
+                      <TableCell>{row.start_time}</TableCell>
+                      <TableCell>{row.end_time}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

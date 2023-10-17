@@ -5,7 +5,6 @@ from datetime import timedelta, timezone, datetime
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, create_access_token
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash
 from flask_mail import Mail
 import json
 
@@ -74,16 +73,6 @@ def resetdb_command():
         create_database(DB_URL)
     print('Creating tables.')
     db.create_all()
-    # Add demo data
-    db.session.add(
-        User(
-            email="test@iu.edu", 
-            password=generate_password_hash("test"), 
-            firstName="Test",
-            lastName="Test",
-            security_question="What is your birth city?",
-            security_answer="test"
-        )
-    )
-    db.session.commit()
+    from utils import load_demo_data
+    load_demo_data(db)
     print('Shiny!')
