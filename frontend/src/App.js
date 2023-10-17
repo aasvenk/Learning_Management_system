@@ -21,10 +21,12 @@ axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  if (error.response.data.msg === "Token has expired") {
+  if (error && error.response && error.response.data && error.response.data.msg === "Token has expired") {
     alert("Token expired. Redirecting to login..")
     window.location.assign("/logout")
+    return
   }
+  alert("Error connecting to server...")
   return Promise.reject(error);
 });
 

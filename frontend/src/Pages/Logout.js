@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux'
 import { setLoggedIn, setToken} from '../slices/userSlice'
 import axios from "axios"

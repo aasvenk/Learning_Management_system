@@ -8,6 +8,20 @@ from app import db
 
 course = Blueprint('course', __name__)
 
+@course.route('/courseDetails/<course_id>')
+@jwt_required()
+def get_course_details(course_id):
+    print(course_id)
+    course = Courses.query.filter_by(id=course_id).first()
+    if not course:
+        make_response(jsonify(courseDetails={}), 404)
+
+    courseDetails = {
+        "name": course.course_name,
+        "description": course.description
+    }
+    return make_response(jsonify(courseDetails=courseDetails), 200)
+
 @course.route('/courseInfo', methods=["GET"])
 @jwt_required()
 def get_course_info():
@@ -20,26 +34,33 @@ def get_course_info():
     userID = user.id
     role = convert_user_role(str(user.role))
 
+    courses = []
+
     #If the user has the admin role they recieves all courseIDs
     if role == "Admin":
         courses = Courses.query.all()
-        course_ids = [course.id for course in courses]
-
+        
     #If the user has instructor role they recieve all courses they are the instructor of
     if role == "Instructor":
         courses = Courses.query.filter_by(instructor_id=userID).all()
-        course_ids = [course.id for course in courses]
 
     if role == "Student":
         enrollments = Enrollment.query.filter_by(student_id=userID).all()
-        course_ids = [enrollment.course_id for enrollment in enrollments]
+        course_ids = [e.course_id for e in enrollments]
+        courses = Courses.query.filter(Courses.id.in_(course_ids)).all()
+
+    courses_response = []
+    for course in courses:
+        courses_response.append({
+            "id": course.id,
+            "course_name": course.course_name,
+            "course_number": course.course_number,
+            "description": course.description,
+        })
 
     response = {
-    "courseInfo": {
-        "studentID": user.id,
-        "courseIDs": course_ids  
+        "courseInfo": courses_response
     }
-}
 
     return make_response(jsonify(response), 200)
 
@@ -284,6 +305,26 @@ def deleteEvent():
 
     db.session.commit()
     return make_response(jsonify(msg="Event Deleted"), 200)
+
+@course.route('/events/<course_id>', methods=['POST'])
+@jwt_required()
+def get_events_on_date(course_id):
+    resp = []
+    data = request.json
+    dateStr = data["q_date"]
+    date = datetime.datetime.strptime(dateStr, '%Y-%m-%d').date()
+    events = Events.query.filter_by(course_id=course_id).all()
+    for event in events:
+        start_date = event.start_time.date()
+        end_date = event.end_time.date()
+        if start_date <= date and date <= end_date:
+            resp.append({
+                "id": event.id,
+                "name": event.event_name,
+                "start_time": event.start_time,
+                "end_time": event.end_time,
+            })
+    return make_response(jsonify(events=resp), 200)
 
 @course.route('/createEvent', methods=["POST"])
 @jwt_required()
