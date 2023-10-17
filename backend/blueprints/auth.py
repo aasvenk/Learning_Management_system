@@ -80,7 +80,7 @@ def logout():
     session.clear()
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
-    return redirect(Configuration.FRONTEND_URL)
+    return make_response(response, 200)
 
 def create_reset_url(email):
     token = secrets.token_hex()
