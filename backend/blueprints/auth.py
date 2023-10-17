@@ -1,4 +1,4 @@
-from flask import Blueprint, request, make_response, jsonify, session
+from flask import Blueprint, request, make_response, jsonify, session, redirect
 from werkzeug.security import generate_password_hash
 from flask_jwt_extended import create_access_token, unset_jwt_cookies
 import secrets
@@ -80,7 +80,7 @@ def logout():
     session.clear()
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
-    return make_response(response, 200)
+    return redirect(Configuration.FRONTEND_URL)
 
 def create_reset_url(email):
     token = secrets.token_hex()
