@@ -13,15 +13,27 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import TestPage from "./Pages/TestPage";
+import Logout from "./Pages/Logout";
 
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
+
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.data.msg === "Token has expired") {
+    alert("Token expired. Redirecting to login..")
+    window.location.assign("/logout")
+  }
+  return Promise.reject(error);
+});
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/logout" element={<Logout />} />
         <Route path="/loggedin" element={<LoggedIn />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
