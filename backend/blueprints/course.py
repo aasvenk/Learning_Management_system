@@ -2,7 +2,7 @@ from flask import Blueprint, make_response, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import datetime
 
-from models import User, Courses, Enrollment, Events
+from models import User, Courses, Enrollment, Events, CourseRequests
 from utils import convert_user_role, string_to_event_type
 from app import db
 
@@ -227,6 +227,30 @@ def updateCourse():
 
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
+@course.route("/makeCourseRequest", methods=["GET"])
+@jwt_required()
+def courseRequests():
+    
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
+    course = request.json
+    if role != "Instructor":
+        return make_response(jsonify(msg="access denied"), 401)
+    try:
+        courseID = course['ID']
+        course_number = course['course_number']
+        course_name = course['course_name']
+        description = course['course_description']
+        instructor_id = course['instructor_id']
+        newRequest = CourseRequests(id=courseID, course_number=course_number, course_name=course_name, description=description, instructor_id=instructor_id)
+        db.session.add(newRequest)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return make_response(jsonify(msg="error creating request, contact administrator"), 500)    
+    
+    return make_response(jsonify(msg="sent request"), 200)
 
 @course.route('/updateStudents', methods=["PUT"])
 #@role_required(["Admin","Instructor"]) 
