@@ -6,18 +6,45 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import CourseList from "../../components/CourseList";
-
-
-
+import Table from '@mui/material/Table';
+import IconButton from '@mui/material/IconButton';
+import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
+import RemoveCircleTwoToneIcon from '@mui/icons-material/RemoveCircleTwoTone';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import axios from 'axios';
 
 export default function AdminDashboard(){
     const [value, setValue] = useState("1");
+    const [requests, updateRequest] = useState([]);
+   if(requests.length == 0){
+      axios.get('/getCourseRequests',{
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')
+        }
+      }).then(response => {
+        let data = response.data['courses']
+        
+        updateRequest(data);
 
+      })
+    }
+    const acceptReq = (req) => {
+      console.log(req);
+    }
+    const denyReq = (req) => {
+      console.log(req.course_name)
+    }
     const handleChange = (event, newValue) => {
       setValue(newValue);
     };
-  
+    let initial_state = 0;
+   
     return (<div>
+
         <Paper elevation={2} style={{ padding: "10px" }}>
           <Box sx={{ width: "100%", typography: "body1" }}>
             <TabContext value={value}>
@@ -33,9 +60,41 @@ export default function AdminDashboard(){
                 </TabList>
               </Box>
               <TabPanel value="1">
-                <h3>All Courses</h3>
-                <CourseList />
-                <h3>Pending Course Requests</h3>
+                <h3>Course Requests</h3>
+                <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Course Name</TableCell>
+            <TableCell align="right">ID</TableCell>
+            <TableCell align="right">Instructor</TableCell>
+            <TableCell align="right">Course Number</TableCell>
+            <TableCell align="right">Course Description</TableCell>
+            <TableCell align="right">Accept</TableCell>
+            <TableCell align="right">Deny</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {requests.map((row) => (
+            <TableRow
+              key={row.course_name}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {row.course_name}
+              </TableCell>
+              <TableCell align="right">{row.id}</TableCell>
+              <TableCell align="right">{row.instructor_id}</TableCell>
+              <TableCell align="right">{row.course_number}</TableCell>
+              <TableCell align="right">{row.description}</TableCell>
+              <TableCell  align="right"><IconButton onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell align="right"><IconButton onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+           
               </TabPanel>
               <TabPanel value="2">
                 <h3>Students</h3>
