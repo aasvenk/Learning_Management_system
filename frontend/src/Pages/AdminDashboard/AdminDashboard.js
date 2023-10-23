@@ -20,6 +20,7 @@ import axios from 'axios';
 export default function AdminDashboard(){
     const [value, setValue] = useState("1");
     const [requests, updateRequest] = useState([]);
+    
    if(requests.length == 0){
       axios.get('/getCourseRequests',{
         headers: {
@@ -96,8 +97,8 @@ export default function AdminDashboard(){
               <TableCell align="right">{row.instructor_id}</TableCell>
               <TableCell align="right">{row.course_number}</TableCell>
               <TableCell align="right">{row.description}</TableCell>
-              <TableCell  align="right"><IconButton disabled = {row.course_name === "No pending requests" ? "true" : "false"} onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
-              <TableCell align="right"><IconButton  disabled = {row.course_name === "No pending requests" ? "true" : "false"} onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell  align="right"><IconButton disabled= {row.course_name == "No pending requests"} onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell align="right"><IconButton  disabled= {row.course_name == "No pending requests"} onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -227,6 +227,49 @@ def updateCourse():
 
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
+
+@course.route('/acceptRequest', methods=['POST'])
+@jwt_required()
+def acceptRequest():
+    email = get_jwt_identity()
+    msg = "successfully accepted request"
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))  
+    if role != 'Admin':
+        return make_response(jsonify(msg= 'access denied'), 401)
+    try:
+        requestedCourse = request.get_json().get("courseReq")
+        course_to_add = CourseRequests.query.filter_by(course_name=requestedCourse).first()
+        clone_it = Courses(id=course_to_add.id, course_number = course_to_add.course_number, course_name = course_to_add.course_name, description = course_to_add.description, instructor_id = course_to_add.instructor_id)
+        db.session.add(clone_it)
+        CourseRequests.query.filter_by(id=course_to_add.id).delete()
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        msg = "Error while accepting request."
+    return make_response(jsonify({"msg": msg}),200)    
+                
+@course.route('/getCourseRequests', methods=['GET'])
+@jwt_required()
+def getCourseRequests():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))  
+    if role != 'Admin':
+        return make_response(jsonify(msg= 'access denied'), 401)
+    course_requests = CourseRequests.query.all()
+    the_response = []
+    for course in course_requests:
+        the_response.append({
+            "id" : course.id,
+            "course_number" : course.course_number,
+            "course_name" : course.course_name,
+            "description" : course.description,
+            "instructor_id" : course.instructor_id,
+        })
+    return make_response({"courses" : the_response}, 200)
+        
+    
 @course.route("/makeCourseRequest", methods=["GET"])
 @jwt_required()
 def courseRequests():
