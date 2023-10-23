@@ -27,16 +27,25 @@ export default function AdminDashboard(){
         }
       }).then(response => {
         let data = response.data['courses']
-        
+        if(data.length == 0){data[0] = {"id":"","course_number": "", "course_name" : "No pending requests", "description" : "", "instructor_id" : ""}; }
         updateRequest(data);
 
       })
     }
     const acceptReq = (req) => {
-      console.log(req);
+      if(window.confirm("Are you sure you want to accept request for " + req.course_name + "?")){
+        axios.post("/acceptRequest", {
+          "courseReq" :  req.course_name
+        }, {
+          headers: {Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')}
+        }
+        ).then(response => {
+          document.getElementById('response').innerHTML = response.data["msg"];
+        })
+      }
     }
     const denyReq = (req) => {
-      console.log(req.course_name)
+      
     }
     const handleChange = (event, newValue) => {
       setValue(newValue);
@@ -87,8 +96,8 @@ export default function AdminDashboard(){
               <TableCell align="right">{row.instructor_id}</TableCell>
               <TableCell align="right">{row.course_number}</TableCell>
               <TableCell align="right">{row.description}</TableCell>
-              <TableCell  align="right"><IconButton onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
-              <TableCell align="right"><IconButton onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell  align="right"><IconButton disabled = {row.course_name === "No pending requests" ? "true" : "false"} onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell align="right"><IconButton  disabled = {row.course_name === "No pending requests" ? "true" : "false"} onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -105,5 +114,6 @@ export default function AdminDashboard(){
             </TabContext>
           </Box>
         </Paper>
+        <p id = "response"></p>
       </div>)
 }
