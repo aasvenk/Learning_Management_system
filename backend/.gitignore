@@ -3,3 +3,4 @@ client_secret.json
 logs/*
 .DS_store
 static/uploads/*
+.venv
