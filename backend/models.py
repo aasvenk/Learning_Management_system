@@ -60,6 +60,13 @@ class Courses(db.Model):
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     instructor = db.relationship('User', foreign_keys=[instructor_id])
 
+class Modules(db.Model):
+    __tablename__ = 'modules'
+    id = db.Column(db.Integer, primary_key = True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    name = db.Column(db.String(120))
+
+
 class Enrollment(db.Model):
     __tablename__ = 'enrollments'
     id = db.Column(db.Integer, primary_key=True)
