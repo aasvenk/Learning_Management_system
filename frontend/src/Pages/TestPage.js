@@ -1,10 +1,16 @@
 
-import EventCalendar from "../components/EventCalendar";
+import FileUpload from "../components/FileUpload";
+import Button from "@mui/material/Button";
 
 function TestPage() {
   return (
     <div>
-      <EventCalendar />
+      <FileUpload 
+        moduleId={1}
+        courseId={1}
+        uploadPath="/module/file/upload" 
+        onfileUpload={(file) => console.log(file)}/>
+        <a rel="noreferrer" href={process.env.REACT_APP_BASE_URL + '/module/file/sample.pdf'} target="_blank">sample.pdf</a>
     </div>
   );
 }
