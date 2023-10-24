@@ -21,7 +21,8 @@ export default function AdminDashboard(){
     const [value, setValue] = useState("1");
     const [requests, updateRequest] = useState([]);
     
-   if(requests.length == 0){
+
+   const reloadRequests = () => {
       axios.get('/getCourseRequests',{
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')
@@ -32,7 +33,10 @@ export default function AdminDashboard(){
         updateRequest(data);
 
       })
-    }
+   }
+   if(requests.length == 0){
+    reloadRequests()
+   }
     const acceptReq = (req) => {
       if(window.confirm("Are you sure you want to accept request for " + req.course_name + "?")){
         axios.post("/acceptRequest", {
@@ -42,11 +46,22 @@ export default function AdminDashboard(){
         }
         ).then(response => {
           document.getElementById('response').innerHTML = response.data["msg"];
+          reloadRequests()
         })
       }
     }
     const denyReq = (req) => {
-      
+      if(window.confirm("Are you sure you want to deny request for " + req.course_name + "?")){
+        axios.post("/denyRequest", {
+          "courseReq" :  req.course_name
+        }, {
+          headers: {Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')}
+        }
+        ).then(response => {
+          document.getElementById('response').innerHTML = response.data["msg"];
+          reloadRequests()
+        })
+      }
     }
     const handleChange = (event, newValue) => {
       setValue(newValue);
