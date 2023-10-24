@@ -228,6 +228,28 @@ def updateCourse():
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
 
+@course.route('/denyRequest', methods=['POST'])
+@jwt_required()
+def denyRequest():
+    email = get_jwt_identity()
+    msg = "successfully denied request"
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))  
+    if role != 'Admin':
+        return make_response(jsonify(msg= 'access denied'), 401)
+    try:
+        requestedCourse = request.get_json().get("courseReq")
+        course_to_add = CourseRequests.query.filter_by(course_name=requestedCourse).first()
+        CourseRequests.query.filter_by(id=course_to_add.id).delete()
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        msg = "Error while denying request."
+    return make_response(jsonify({"msg": msg}),200)
+
+
+
+
 @course.route('/acceptRequest', methods=['POST'])
 @jwt_required()
 def acceptRequest():
