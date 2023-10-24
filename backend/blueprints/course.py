@@ -1,10 +1,13 @@
+import os
+import datetime
 from flask import Blueprint, make_response, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import datetime
+from werkzeug.utils import secure_filename
 
 from models import User, Courses, Enrollment, Events
 from utils import convert_user_role, string_to_event_type
 from app import db
+from config import Configuration
 
 course = Blueprint('course', __name__)
 
@@ -384,3 +387,21 @@ def createEvent():
 
     db.session.commit()
     return make_response(jsonify(msg="Event Created"), 200)
+
+@course.route('/upload', methods=["POST"])
+@jwt_required()
+def upload_file():
+    file = request.files['file']
+    if file.filename == '':
+        return make_response(jsonify(status="Empty file name"), 400)
+    elif not allowed_file(file.filename):
+        return make_response(jsonify(status="File type not allowed"), 400)
+    
+    filename = secure_filename(file.filename)
+    file.save(os.path.join('static/uploads', filename))
+
+    return make_response(jsonify(status="success"), 200)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in Configuration.ALLOWED_EXTENSIONS

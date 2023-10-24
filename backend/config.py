@@ -24,3 +24,6 @@ class Configuration(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
+    # File upload
+    ALLOWED_EXTENSIONS = {'pdf'}
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
