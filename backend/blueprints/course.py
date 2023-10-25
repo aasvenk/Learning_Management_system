@@ -153,6 +153,12 @@ def deleteCourse():
 
     if not courses:
         return {"msg": "Could not find course."}, 401
+    
+    events_to_delete = Events.query.filter_by(course_id=courseID).all()
+
+    for event in events_to_delete:
+        db.session.delete(event)
+    db.session.commit()
 
     # Uncomment when adding students and removing students from enrollment APIs are created
 
@@ -389,8 +395,6 @@ def createEvent():
     
     required_params = ["event_name", "event_type", "courseID", "start_time", "end_time"]
 
-    required_params = ["eventName", "eventType",
-                       "courseID", "startTime", "endTime"]
 
     missing_params = [param for param in required_params if param not in data]
 
