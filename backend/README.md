@@ -71,4 +71,6 @@ pkill gunicorn
 ```
 
 ## References
-https://github.com/Abhiramborige/Flask-React-Google-Login/blob/main/flask-server-google/app.py
+
+- https://github.com/Abhiramborige/Flask-React-Google-Login/blob/main/flask-server-google/app.py
+- https://dev.to/nagatodev/series/15583
