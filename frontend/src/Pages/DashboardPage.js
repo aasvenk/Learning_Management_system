@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useEffect } from 'react';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserInfo } from "../slices/userSlice";
-import { useDispatch } from "react-redux";
-import StudentDashboard from "./StudentDashboard/StudentDashboard";
 import AdminDashboard from "./AdminDashboard/AdminDashboard";
+import InstructorDashboard from "./InstructorDashboard/InstructorDashboard";
+import StudentDashboard from "./StudentDashboard/StudentDashboard";
 
 function DashboardPage() {
   const {role} = useSelector((state) => state.user.userInfo)
@@ -32,7 +32,7 @@ function DashboardPage() {
     // role?
     <div>
       {role === "Admin" && (<AdminDashboard />)}
-      {role === "Instructor" && (<div>Instructor</div>)}
+      {role === "Instructor" && (<InstructorDashboard />)}
       {role === "Student" && (<StudentDashboard />)}
     </div>
   );
