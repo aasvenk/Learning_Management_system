@@ -1,20 +1,17 @@
 
-from flask import Blueprint, make_response, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
-
-import os
 import datetime
-from flask import Blueprint, make_response, jsonify, request, send_from_directory
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from werkzeug.utils import secure_filename
-from operator import and_
+import os
 from datetime import datetime
+from operator import and_
 
-from models import User, Courses, Enrollment, Events, Modules, CourseRequests
-from utils import convert_user_role, string_to_event_type
 from app import db
 from config import Configuration
+from flask import (Blueprint, jsonify, make_response, request,
+                   send_from_directory)
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from models import CourseRequests, Courses, Enrollment, Events, Modules, User
+from utils import convert_user_role, string_to_event_type
+from werkzeug.utils import secure_filename
 
 course = Blueprint('course', __name__)
 
@@ -529,107 +526,6 @@ def createEvent():
 
     db.session.commit()
     return make_response(jsonify(msg="Event Created"), 200)
-
-@course.route('/searchCourse', methods=["POST"])
-@jwt_required()
-def searchCourse():
-    data = request.json
-
-    required_params = ["search","searchParam"]
-
-    missing_params = [param for param in required_params if param not in data]
-
-    if missing_params:
-        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
-    
-    searchData = data["search"]
-    searchParam = data["searchParam"]
-
-    possible_params = ["course_number","course_name","description","instructor"]
-
-    if searchParam not in possible_params:
-        return jsonify({"error": "Invalid searchParam. Allowed values are: course_number, course_name, description, instructor"}), 400
-
-
-
-    if searchParam == "course_name":
-        courses = Courses.query.filter(Courses.course_name.like('%' + searchData + '%')).order_by(Courses.course_name).all()
-    if searchParam == "course_number":
-        courses = Courses.query.filter(Courses.course_number.like('%' + searchData + '%')).order_by(Courses.course_number).all()
-    if searchParam == "description":
-        courses = Courses.query.filter(Courses.description.like('%' + searchData + '%')).order_by(Courses.description).all()
-    
-    if searchParam == "instructor":
-        instructorsFirstName = User.query.filter(User.firstName.like('%' + searchData + '%')).order_by(User.firstName).all()
-        instructorsLastName = User.query.filter(User.lastName.like('%' + searchData + '%')).order_by(User.lastName).all()
-
-        instructors = instructorsFirstName + instructorsLastName
-
-        instructor_ids = [instructor.id for instructor in instructors]
-
-        courses = Courses.query.filter(Courses.instructor_id.in_(instructor_ids)).all()
-
-
-    courses_list = []
-    for course in courses:
-        course_dict = {
-            'course_name': course.course_name,
-            'course_id': course.id
-        }
-        courses_list.append(course_dict)
-
-    return make_response(jsonify(searchResults=courses_list), 200)
-
-
-@course.route('/searchEvent', methods=["POST"])
-@jwt_required()
-def searchEvent():
-    data = request.json
-    
-
-    required_params = ["search","searchParam"]
-    missing_params = [param for param in required_params if param not in data]
-
-    if missing_params:
-        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
-    
-    searchData = data["search"]
-    searchParam = data["searchParam"]
-    
-    course_id = request.json.get("course_id", None)
-        
-
-    courseTypes = ["LAB","DISCUSSION","CLASS"]
-
-    if searchData not in courseTypes and searchParam == "event_type":
-        return jsonify({"error": "Invalid searchParam. Allowed values are: LAB, DISCUSSION, CLASS"}), 400
-
-    possible_params = ["event_name","event_type"]
-
-    if searchParam not in possible_params:
-        return jsonify({"error": "Invalid searchParam. Allowed values are: event_name, event_type"}), 400
-
-    if searchParam == "event_name" and course_id is None:
-        events = Events.query.filter(Events.event_name.like('%' + searchData + '%')).order_by(Events.event_name).all()
-
-    if searchParam == "event_type" and course_id is None:
-        events = Events.query.filter(Events.event_type == string_to_event_type(searchData)).order_by(Events.event_type).all()
-
-    if searchParam == "event_name" and course_id is not None:
-        events = Events.query.filter(and_(Events.course_id == course_id, Events.event_name.like('%' + searchData + '%'))).order_by(Events.event_name).all()
-    
-    if searchParam == "event_type" and course_id is not None:
-        events = Events.query.filter(and_(Events.course_id == course_id, Events.event_type == string_to_event_type(searchData))).order_by(Events.event_name).all()
-
-    events_list = []
-    for event in events:
-        event_dict = {
-            'event_name': event.event_name,
-            'event_id': event.id
-        }
-        events_list.append(event_dict)
-
-    return make_response(jsonify(searchResults=events_list), 200)
 
 @course.route('/module/file/upload', methods=["POST"])
 @jwt_required()

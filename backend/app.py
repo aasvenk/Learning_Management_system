@@ -1,12 +1,14 @@
+import json
+from datetime import datetime, timedelta, timezone
+
 from config import Configuration
 from flask import Flask, make_response, redirect
 from flask_cors import CORS
-from datetime import timedelta, timezone, datetime
-from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_jwt_extended import JWTManager, get_jwt, get_jwt_identity, create_access_token
-from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import (JWTManager, create_access_token, get_jwt,
+                                get_jwt_identity)
 from flask_mail import Mail
-import json
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
@@ -20,24 +22,33 @@ jwt = JWTManager(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
 
+# Register blueprints
+from blueprints.auth import auth as auth_blueprint
 # Should be imported after db is initialized
 from models import User
 
-# Register blueprints
-from blueprints.auth import auth as auth_blueprint
 app.register_blueprint(auth_blueprint)
 
 from blueprints.google_auth import google_auth as google_auth_blueprint
+
 app.register_blueprint(google_auth_blueprint)
 
 from blueprints.course import course as course_blueprint
+
 app.register_blueprint(course_blueprint)
 
-from blueprints.course_annoucements import course_annoucements as course_annoucements_blueprint
+from blueprints.course_annoucements import \
+    course_annoucements as course_annoucements_blueprint
+
 app.register_blueprint(course_annoucements_blueprint)
 
 from blueprints.user import user as user_blueprint
+
 app.register_blueprint(user_blueprint)
+
+from blueprints.search import search as search_blueprint
+
+app.register_blueprint(search_blueprint)
 
 @app.route('/')
 def hello():
@@ -64,7 +75,8 @@ def refresh_expiring_jwts(response):
 def resetdb_command():
     """Destroys and creates the database + tables."""
     DB_URL = Configuration.SQLALCHEMY_DATABASE_URI
-    from sqlalchemy_utils import database_exists, create_database, drop_database
+    from sqlalchemy_utils import (create_database, database_exists,
+                                  drop_database)
     if database_exists(DB_URL):
         print('Deleting database.')
         drop_database(DB_URL)
