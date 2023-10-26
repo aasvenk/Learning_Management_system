@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required
 from models import Courses, Events, User
 from utils import string_to_event_type
 
-search = Blueprint('course', __name__)
+search = Blueprint('search', __name__)
 
 @search.route('/search/course', methods=["POST"])
 @jwt_required()
@@ -29,6 +29,7 @@ def searchCourse():
 
 
     if searchParam == "course_name":
+        print(searchData, searchParam)
         courses = Courses.query.filter(Courses.course_name.like('%' + searchData + '%')).order_by(Courses.course_name).all()
     if searchParam == "course_number":
         courses = Courses.query.filter(Courses.course_number.like('%' + searchData + '%')).order_by(Courses.course_number).all()
