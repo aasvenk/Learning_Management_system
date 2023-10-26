@@ -26,7 +26,7 @@ axios.interceptors.response.use(function (response) {
     window.location.assign("/logout")
     return
   }
-  alert("Error connecting to server...")
+  // alert("Error connecting to server...")
   return Promise.reject(error);
 });
 
@@ -40,9 +40,9 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path = "/resetpassword" element = {<ChangePassword />} />
-        <Route path = "/test" element = {<TestPage />} />
-
         <Route path = "/course/:id" element = {<CoursePage />} />
+        
+        <Route path = "/test" element = {<TestPage />} />
       </Routes>
     </Router>
   );

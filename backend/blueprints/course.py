@@ -1,12 +1,24 @@
+
 from flask import Blueprint, make_response, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+
+
+import os
 import datetime
+from flask import Blueprint, make_response, jsonify, request, send_from_directory
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
+from operator import and_
+from datetime import datetime
+
 
 from models import User, Courses, Enrollment, Events, CourseRequests
 from utils import convert_user_role, string_to_event_type
 from app import db
+from config import Configuration
 
 course = Blueprint('course', __name__)
+
 
 @course.route('/courseDetails/<course_id>')
 @jwt_required()
@@ -22,6 +34,7 @@ def get_course_details(course_id):
     }
     return make_response(jsonify(courseDetails=courseDetails), 200)
 
+
 @course.route('/courseInfo', methods=["GET"])
 @jwt_required()
 def get_course_info():
@@ -30,17 +43,17 @@ def get_course_info():
 
     if not user:
         return make_response(jsonify(msg="user not found"), 401)
-    
+
     userID = user.id
     role = convert_user_role(str(user.role))
 
     courses = []
 
-    #If the user has the admin role they recieves all courseIDs
+    # If the user has the admin role they recieves all courseIDs
     if role == "Admin":
         courses = Courses.query.all()
-        
-    #If the user has instructor role they recieve all courses they are the instructor of
+
+    # If the user has instructor role they recieve all courses they are the instructor of
     if role == "Instructor":
         courses = Courses.query.filter_by(instructor_id=userID).all()
 
@@ -64,6 +77,7 @@ def get_course_info():
 
     return make_response(jsonify(response), 200)
 
+
 @course.route('/createCourse', methods=["POST"])
 @jwt_required()
 def createCourse():
@@ -79,66 +93,87 @@ def createCourse():
     if "description" not in data or not data["description"]:
         return jsonify({"message": "Description is required"}), 400
 
-    if "courseNumber" not in data or not data["courseNumber"]:
+    if "course_number" not in data or not data["course_number"]:
         return jsonify({"message": "Course number is required"}), 400
 
     if "instructorID" not in data or not data["instructorID"]:
         return jsonify({"message": "Instructor ID is required"}), 400
     
-    if "courseName" not in data or not data["courseName"]:
+    if "course_name" not in data or not data["course_name"]:
+
         return jsonify({"message": "Course name is required"}), 400
-    
+
     description = data["description"]
-    courseNumber = data["courseNumber"]
+    course_number = data["course_number"]
     instructorID = data["instructorID"]
-    courseName = data["courseName"]
+    course_name = data["course_name"]
 
     instructor = User.query.filter_by(id=instructorID).first()
 
     if not instructor:
-        return jsonify({"message": "Invalid Instructor ID"}), 400
+        return jsonify({"message": "Invalid Instructor ID"}), 400    
     
-    
-    new_course = Courses(description=description, courseName=courseName, courseNumber=courseNumber, instructor_id=instructorID)
+    new_course = Courses(description=description, course_name=course_name, course_number=course_number, instructor_id=instructorID)
+
     db.session.add(new_course)
 
     db.session.commit()
     return make_response(jsonify(msg="Course Created"), 200)
+
 
 @course.route('/deleteCourse', methods=["DELETE"])
 @jwt_required()
 def deleteCourse():
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
-    courseID = request.json.get("courseID", None)
+    data = request.json
+
+
+
     role = convert_user_role(str(user.role))
 
     if role == "Student" or role == "Instructor":
         return {"msg": "You do not have the appropriate role to perform these actions"}, 401
     
+    required_params = ["course_id"]
+
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    courseID = request.json.get("course_id", None)
+   
     if courseID == "":
         return {"msg": "Please verify courseID"}, 401
-    
+
     enrollments = Enrollment.query.filter_by(course_id=courseID).all()
 
     courses = Courses.query.filter_by(id=courseID).all()
 
     if not courses:
         return {"msg": "Could not find course."}, 401
-
-    #Uncomment when adding students and removing students from enrollment APIs are created
-
-    #if not enrollments or not courses:
-        #return {"msg": "Could not find course."}, 401
-
-    #for enrollment in enrollments:
-        #db.session.delete(enrollment)
     
+    events_to_delete = Events.query.filter_by(course_id=courseID).all()
+
+    for event in events_to_delete:
+        db.session.delete(event)
+    db.session.commit()
+
+    # Uncomment when adding students and removing students from enrollment APIs are created
+
+    # if not enrollments or not courses:
+        # return {"msg": "Could not find course."}, 401
+
+    # for enrollment in enrollments:
+        # db.session.delete(enrollment)
+
     for course in courses:
         db.session.delete(course)
 
     db.session.commit()
     return make_response(jsonify(msg="Course Deleted"), 200)
+
 
 @course.route('/updateCourse', methods=["PUT"])
 @jwt_required()
@@ -149,33 +184,34 @@ def updateCourse():
     role = convert_user_role(str(user.role))
     data = request.json
 
-
     if not courseID:
         return {"msg": "No courseID specified."}, 401
 
     if role == "Student":
         return {"msg": "Students cannot update courses."}, 401
 
+
     if role == "Instructor": 
-        if "courseName" in data or "description" in data:
+        if "course_name" in data or "description" in data:
+        
             course = Courses.query.filter_by(id=courseID).first()
             if course:
-                
+
                 update_data = {}
 
-                if "courseName" in data:
-                    update_data['courseName'] = data["courseName"]
+                if "course_name" in data:
+                    update_data['course_name'] = data["course_name"]
                 else:
-                    
-                    update_data['courseName'] = course.courseName
+                 
+                    update_data['course_name'] = course.course_name
 
                 if "description" in data:
                     update_data['description'] = data["description"]
                 else:
-                    
+
                     update_data['description'] = course.description
 
-                course.name = update_data['courseName']
+                course.name = update_data['course_name']
                 course.description = update_data['description']
 
                 Courses.query.filter_by(id=courseID).update(update_data)
@@ -183,17 +219,17 @@ def updateCourse():
             return {"msg": "Please verify input fields."}, 401
     
     if role == "Admin": 
-        if "courseName" in data or "description" in data or "courseNumber" in data or "instructor_id" in data:
+        if "course_name" in data or "description" in data or "course_number" in data or "instructor_id" in data:
             course = Courses.query.filter_by(id=courseID).first()
             if course:
                 # Assuming data contains 'name' and 'description' fields
                 update_data = {}
 
-                if "courseName" in data:
-                    update_data['courseName'] = data["courseName"]
+                if "course_name" in data:
+                    update_data['course_name'] = data["course_name"]
                 else:
                     # If 'name' is not in data, retain the current value from the database
-                    update_data['courseName'] = course.courseName
+                    update_data['course_name'] = course.course_name
 
                 if "description" in data:
                     update_data['description'] = data["description"]
@@ -201,23 +237,22 @@ def updateCourse():
                     # If 'description' is not in data, retain the current value from the database
                     update_data['description'] = course.description
                 
-                if "courseNumber" in data:
-                    update_data['courseNumber'] = data["courseNumber"]
+                if "course_number" in data:
+                    update_data['course_number'] = data["course_number"]
                 else:
                     # If 'description' is not in data, retain the current value from the database
-                    update_data['courseNumber'] = course.courseNumber
+                    update_data['course_number'] = course.course_number
                 
                 if "instructor" in data:
                     update_data['instructor_id'] = data["instructor_id"]
                 else:
                     # If 'description' is not in data, retain the current value from the database
                     update_data['instructor_id'] = course.instructor_id
-                
-                
+
                 # Update the course with the new data
-                course.name = update_data['courseName']
+                course.name = update_data['course_name']
                 course.description = update_data['description']
-                course.courseNumber = update_data['courseNumber']
+                course.course_number = update_data['course_number']
                 course.instructor_id = update_data['instructor_id']
 
                 # Update records in the Courses model with the corresponding courseID
@@ -318,7 +353,7 @@ def courseRequests():
     return make_response(jsonify(msg="sent request"), 200)
 
 @course.route('/updateStudents', methods=["PUT"])
-#@role_required(["Admin","Instructor"]) 
+# @role_required(["Admin","Instructor"])
 @jwt_required()
 def updateStudents():
     courseID = request.json.get("courseID", None)
@@ -329,8 +364,8 @@ def updateStudents():
 
     if role == "Student":
         return {"msg": "Students cannot update courses."}, 401
-    
-    #ToDo Need to write an update function for the Enrollments model
+
+    # ToDo Need to write an update function for the Enrollments model
 
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
@@ -340,7 +375,15 @@ def updateStudents():
 @jwt_required()
 def getEventsForCourse():
     data = request.json
-    courseID = data["courseID"]
+
+    required_params = ["course_id"]
+
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    courseID = data["course_id"]
 
     events = Events.query.filter_by(course_id=courseID).all()
 
@@ -348,14 +391,15 @@ def getEventsForCourse():
         return make_response(jsonify(msg="No events found for the specified courseID"), 401)
     
     
-    event_data = [{'event_name': event.eventName, 'event_type': event.event.as_string(), 'event_id': event.id, 'start_time': event.start_time, 'end_time': event.end_time} for event in events]
+    event_data = [{'event_name': event.event_name, 'event_type': event.event_type.as_string(), 'event_id': event.id, 'start_time': event.start_time, 'end_time': event.end_time} for event in events]
 
     response = {
-    "courseInfo": {
-        "eventData": event_data
+        "courseInfo": {
+            "eventData": event_data
+        }
     }
-}
     return make_response(jsonify(response), 200)
+
 
 @course.route('/deleteEvent', methods=["DELETE"])
 @jwt_required()
@@ -363,15 +407,24 @@ def deleteEvent():
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
     data = request.json
-    eventID = data["eventID"]
     role = convert_user_role(str(user.role))
+    
+
+    required_params = ["event_id"]
+
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    eventID = data["event_id"]
 
     if role == "Student":
         return {"msg": "Students cannot update events."}, 401
 
     if eventID == "":
         return {"msg": "Please verify eventID"}, 401
-    
+
     event = Events.query.filter_by(id=eventID).first()
 
     if not event:
@@ -379,7 +432,6 @@ def deleteEvent():
 
     eventCourseID = event.course_id
 
-    
     eventCourse = Courses.query.filter_by(id=eventCourseID).first()
 
     if not eventCourse:
@@ -394,6 +446,7 @@ def deleteEvent():
 
     db.session.commit()
     return make_response(jsonify(msg="Event Deleted"), 200)
+
 
 @course.route('/events/<course_id>', methods=['POST'])
 @jwt_required()
@@ -415,61 +468,198 @@ def get_events_on_date(course_id):
             })
     return make_response(jsonify(events=resp), 200)
 
+
 @course.route('/createEvent', methods=["POST"])
 @jwt_required()
 def createEvent():
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
     data = request.json
-    eventName = data["eventName"]
-    eventType = data["eventType"]
-    courseID = data["courseID"]
-    startTime_str = data["startTime"]
-    endTime_str = data["endTime"]
-    repeating = data.get("repeating", None)
     role = convert_user_role(str(user.role))
+    
 
     if role == "Student":
         return {"msg": "Students cannot create events."}, 401
     
-    required_params = ["eventName", "eventType", "courseID", "startTime", "endTime"]
+    required_params = ["event_name", "event_type", "courseID", "start_time", "end_time"]
+
 
     missing_params = [param for param in required_params if param not in data]
 
     if missing_params:
         return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
     
+    event_name = data["event_name"]
+    event_type = data["event_type"]
+    courseID = data["courseID"]
+    start_time_str = data["start_time"]
+    end_time_str = data["end_time"]
+    repeating = data.get("repeating", None)
+
     try:
-        startTime = datetime.fromisoformat(startTime_str)
-        endTime = datetime.fromisoformat(endTime_str)
+        start_time = datetime.fromisoformat(start_time_str)
+        end_time = datetime.fromisoformat(end_time_str)
     except ValueError:
         return {"msg": "Invalid date-time format for startTime or endTime."}, 400
-    
+
     course = Courses.query.get(courseID)
-    
+
     if not course:
         return {"msg": "Course not found."}, 401
-    
+
     courseInstructor = course.instructor
-    
+
     if courseInstructor.id != user.id and role != "Admin":
         return {"msg": "You do not teach this course."}, 401
     
-    eventTypeObj = string_to_event_type(eventType)
+    event_typeObj = string_to_event_type(event_type)
 
     if repeating:
         if repeating.lower() == "true":
-            new_event = Events(eventName=eventName, event=eventTypeObj, start_time=startTime,
-                       end_time=endTime, repeating_weekly=True, course=course)
+            new_event = Events(event_name=event_name, event_type=event_typeObj, start_time=start_time,
+                       end_time=end_time, repeating_weekly=True, course=course)
         else:
-            new_event = Events(eventName=eventName, event=eventTypeObj, start_time=startTime,
-                       end_time=endTime, repeating_weekly=False, course=course)
+            new_event = Events(event_name=event_name, event_type=event_typeObj, start_time=start_time,
+                       end_time=end_time, repeating_weekly=False, course=course)
             
     else:
-        new_event = Events(eventName=eventName, event=eventTypeObj, start_time=startTime,
-                       end_time=endTime, course=course)
+        new_event = Events(event_name=event_name, event_type=event_typeObj, start_time=start_time,
+                       end_time=end_time, course=course)
 
     db.session.add(new_event)
 
     db.session.commit()
     return make_response(jsonify(msg="Event Created"), 200)
+
+@course.route('/searchCourse', methods=["POST"])
+@jwt_required()
+def searchCourse():
+    data = request.json
+
+    required_params = ["search","searchParam"]
+
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    searchData = data["search"]
+    searchParam = data["searchParam"]
+
+    possible_params = ["course_number","course_name","description","instructor"]
+
+    if searchParam not in possible_params:
+        return jsonify({"error": "Invalid searchParam. Allowed values are: course_number, course_name, description, instructor"}), 400
+
+
+
+    if searchParam == "course_name":
+        courses = Courses.query.filter(Courses.course_name.like('%' + searchData + '%')).order_by(Courses.course_name).all()
+    if searchParam == "course_number":
+        courses = Courses.query.filter(Courses.course_number.like('%' + searchData + '%')).order_by(Courses.course_number).all()
+    if searchParam == "description":
+        courses = Courses.query.filter(Courses.description.like('%' + searchData + '%')).order_by(Courses.description).all()
+    
+    if searchParam == "instructor":
+        instructorsFirstName = User.query.filter(User.firstName.like('%' + searchData + '%')).order_by(User.firstName).all()
+        instructorsLastName = User.query.filter(User.lastName.like('%' + searchData + '%')).order_by(User.lastName).all()
+
+        instructors = instructorsFirstName + instructorsLastName
+
+        instructor_ids = [instructor.id for instructor in instructors]
+
+        courses = Courses.query.filter(Courses.instructor_id.in_(instructor_ids)).all()
+
+
+    courses_list = []
+    for course in courses:
+        course_dict = {
+            'course_name': course.course_name,
+            'course_id': course.id
+        }
+        courses_list.append(course_dict)
+
+    return make_response(jsonify(searchResults=courses_list), 200)
+
+
+@course.route('/searchEvent', methods=["POST"])
+@jwt_required()
+def searchEvent():
+    data = request.json
+    
+
+    required_params = ["search","searchParam"]
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    searchData = data["search"]
+    searchParam = data["searchParam"]
+    
+    course_id = request.json.get("course_id", None)
+        
+
+    courseTypes = ["LAB","DISCUSSION","CLASS"]
+
+    if searchData not in courseTypes and searchParam == "event_type":
+        return jsonify({"error": "Invalid searchParam. Allowed values are: LAB, DISCUSSION, CLASS"}), 400
+
+    possible_params = ["event_name","event_type"]
+
+    if searchParam not in possible_params:
+        return jsonify({"error": "Invalid searchParam. Allowed values are: event_name, event_type"}), 400
+
+    if searchParam == "event_name" and course_id is None:
+        events = Events.query.filter(Events.event_name.like('%' + searchData + '%')).order_by(Events.event_name).all()
+
+    if searchParam == "event_type" and course_id is None:
+        events = Events.query.filter(Events.event_type == string_to_event_type(searchData)).order_by(Events.event_type).all()
+
+    if searchParam == "event_name" and course_id is not None:
+        events = Events.query.filter(and_(Events.course_id == course_id, Events.event_name.like('%' + searchData + '%'))).order_by(Events.event_name).all()
+    
+    if searchParam == "event_type" and course_id is not None:
+        events = Events.query.filter(and_(Events.course_id == course_id, Events.event_type == string_to_event_type(searchData))).order_by(Events.event_name).all()
+
+    events_list = []
+    for event in events:
+        event_dict = {
+            'event_name': event.event_name,
+            'event_id': event.id
+        }
+        events_list.append(event_dict)
+
+    return make_response(jsonify(searchResults=events_list), 200)
+
+@course.route('/module/file/upload', methods=["POST"])
+@jwt_required()
+def upload_module_file():
+    data = request.form
+    course_id = data["course_id"]
+    module_id = data["module_id"]
+    file = request.files['file']
+
+    if file.filename == '':
+        return make_response(jsonify(status="Empty file name"), 400)
+    elif not allowed_file(file.filename):
+        return make_response(jsonify(status="File type not allowed"), 400)
+
+    filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
+    filename = secure_filename(filename)
+    file.save(os.path.join('static/uploads', filename))
+
+    # TODO: Add to module model in database
+
+    return make_response(jsonify(status="success"), 200)
+
+
+@course.route('/module/file/<filename>', methods=['GET'])
+def open_module_file(filename):
+    return send_from_directory(directory='static/uploads', path=filename, mimetype='application/pdf')
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower(
+           ) in Configuration.ALLOWED_EXTENSIONS
