@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { setUserInfo } from "../slices/userSlice";
 import { useDispatch } from "react-redux";
 import StudentDashboard from "./StudentDashboard/StudentDashboard";
+import AdminDashboard from "./AdminDashboard/AdminDashboard";
 
 function DashboardPage() {
   const {role} = useSelector((state) => state.user.userInfo)
@@ -30,7 +31,7 @@ function DashboardPage() {
     // Based on role render correct dashboard page
     // role?
     <div>
-      {role === "Admin" && (<div>Admin</div>)}
+      {role === "Admin" && (<AdminDashboard />)}
       {role === "Instructor" && (<div>Instructor</div>)}
       {role === "Student" && (<StudentDashboard />)}
     </div>

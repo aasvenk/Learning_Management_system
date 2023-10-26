@@ -12,7 +12,7 @@ from operator import and_
 from datetime import datetime
 
 
-from models import User, Courses, Enrollment, Events
+from models import User, Courses, Enrollment, Events, CourseRequests
 from utils import convert_user_role, string_to_event_type
 from app import db
 from config import Configuration
@@ -263,6 +263,94 @@ def updateCourse():
     db.session.commit()
     return make_response(jsonify(msg="Course Updated"), 200)
 
+@course.route('/denyRequest', methods=['POST'])
+@jwt_required()
+def denyRequest():
+    email = get_jwt_identity()
+    msg = "successfully denied request"
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))  
+    if role != 'Admin':
+        return make_response(jsonify(msg= 'access denied'), 401)
+    try:
+        requestedCourse = request.get_json().get("courseReq")
+        course_to_add = CourseRequests.query.filter_by(course_name=requestedCourse).first()
+        CourseRequests.query.filter_by(id=course_to_add.id).delete()
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        msg = "Error while denying request."
+    return make_response(jsonify({"msg": msg}),200)
+
+
+
+
+@course.route('/acceptRequest', methods=['POST'])
+@jwt_required()
+def acceptRequest():
+    email = get_jwt_identity()
+    msg = "successfully accepted request"
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))  
+    if role != 'Admin':
+        return make_response(jsonify(msg= 'access denied'), 401)
+    try:
+        requestedCourse = request.get_json().get("courseReq")
+        course_to_add = CourseRequests.query.filter_by(course_name=requestedCourse).first()
+        clone_it = Courses(id=course_to_add.id, course_number = course_to_add.course_number, course_name = course_to_add.course_name, description = course_to_add.description, instructor_id = course_to_add.instructor_id)
+        db.session.add(clone_it)
+        CourseRequests.query.filter_by(id=course_to_add.id).delete()
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        msg = "Error while accepting request."
+    return make_response(jsonify({"msg": msg}),200)    
+                
+@course.route('/getCourseRequests', methods=['GET'])
+@jwt_required()
+def getCourseRequests():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))  
+    if role != 'Admin':
+        return make_response(jsonify(msg= 'access denied'), 401)
+    course_requests = CourseRequests.query.all()
+    the_response = []
+    for course in course_requests:
+        the_response.append({
+            "id" : course.id,
+            "course_number" : course.course_number,
+            "course_name" : course.course_name,
+            "description" : course.description,
+            "instructor_id" : course.instructor_id,
+        })
+    return make_response({"courses" : the_response}, 200)
+        
+    
+@course.route("/makeCourseRequest", methods=["GET"])
+@jwt_required()
+def courseRequests():
+    
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
+    course = request.json
+    if role != "Instructor":
+        return make_response(jsonify(msg="access denied"), 401)
+    try:
+        courseID = course['ID']
+        course_number = course['course_number']
+        course_name = course['course_name']
+        description = course['course_description']
+        instructor_id = course['instructor_id']
+        newRequest = CourseRequests(id=courseID, course_number=course_number, course_name=course_name, description=description, instructor_id=instructor_id)
+        db.session.add(newRequest)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return make_response(jsonify(msg="error creating request, contact administrator"), 500)    
+    
+    return make_response(jsonify(msg="sent request"), 200)
 
 @course.route('/updateStudents', methods=["PUT"])
 # @role_required(["Admin","Instructor"])

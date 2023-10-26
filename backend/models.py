@@ -74,5 +74,13 @@ class PasswordRecovery(db.Model):
     email = db.Column(db.String(120), unique=True, primary_key = True)
     token = db.Column(db.Text)
 
-
+class CourseRequests(db.Model):
+    __tablename__ = 'course_requests'
+    id = db.Column(db.Integer, primary_key = True)
+    course_number = db.Column(db.String(), index=True, unique=True)
+    course_name = db.Column(db.String())
+    description = db.Column(db.String())
+    instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    instructor = db.relationship('User', foreign_keys=[instructor_id])
+    
 
