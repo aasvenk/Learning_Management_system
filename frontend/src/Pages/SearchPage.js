@@ -8,9 +8,11 @@ import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppHeader from "../components/AppHeader";
 
 function SearchPage() {
+  const navigation = useNavigate()
   const [entityValue, setEntityValue] = useState('')
   const [searchParamValue, setSearchParamValue] = useState('')
   const [searchInput, setSearchInput] = useState('')
@@ -138,11 +140,16 @@ function SearchPage() {
             <h2>Results</h2>
             {searchResults.length === 0 && <p>No Results</p>}
             {entityValue === 'course' && (searchResults.map((item) => (
-            <Box key={item.course_id} style={{padding: 10, margin: 2, border: "1px solid grey"}}>
-              <label>Number: </label><p>{item.course_number}</p>
-              <label>Name: </label><p>{item.course_name}</p>
-              <label>Description: </label><p>{item.description}</p>
-            </Box>
+              <Box 
+
+                onClick={() => navigation('/course/' + item.course_id)}
+                key={item.course_id} 
+                style={{padding: 10, margin: 2, border: "1px solid grey", cursor: "pointer"}}
+                >
+                <label>Number: </label><p>{item.course_number}</p>
+                <label>Name: </label><p>{item.course_name}</p>
+                <label>Description: </label><p>{item.description}</p>
+              </Box>
             )))}
           </Box>
         </Paper>
