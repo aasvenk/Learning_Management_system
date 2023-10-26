@@ -1,4 +1,6 @@
 
+from operator import and_
+
 from flask import Blueprint, jsonify, make_response, request
 from flask_jwt_extended import jwt_required
 from models import Courses, Events, User
@@ -26,17 +28,18 @@ def searchCourse():
     if searchParam not in possible_params:
         return jsonify({"error": "Invalid searchParam. Allowed values are: course_number, course_name, description, instructor"}), 400
 
+    print(searchData, searchParam)
+
     if searchParam == "course_name":
-        print(searchData, searchParam)
-        courses = Courses.query.filter(Courses.course_name.like('%' + searchData + '%')).order_by(Courses.course_name).all()
+        courses = Courses.query.filter(Courses.course_name.ilike('%' + searchData + '%')).order_by(Courses.course_name).all()
     if searchParam == "course_number":
-        courses = Courses.query.filter(Courses.course_number.like('%' + searchData + '%')).order_by(Courses.course_number).all()
+        courses = Courses.query.filter(Courses.course_number.ilike('%' + searchData + '%')).order_by(Courses.course_number).all()
     if searchParam == "description":
-        courses = Courses.query.filter(Courses.description.like('%' + searchData + '%')).order_by(Courses.description).all()
+        courses = Courses.query.filter(Courses.description.ilike('%' + searchData + '%')).order_by(Courses.description).all()
     
     if searchParam == "instructor":
-        instructorsFirstName = User.query.filter(User.firstName.like('%' + searchData + '%')).order_by(User.firstName).all()
-        instructorsLastName = User.query.filter(User.lastName.like('%' + searchData + '%')).order_by(User.lastName).all()
+        instructorsFirstName = User.query.filter(User.firstName.ilike('%' + searchData + '%')).order_by(User.firstName).all()
+        instructorsLastName = User.query.filter(User.lastName.ilike('%' + searchData + '%')).order_by(User.lastName).all()
 
         instructors = instructorsFirstName + instructorsLastName
 
@@ -49,7 +52,9 @@ def searchCourse():
     for course in courses:
         course_dict = {
             'course_name': course.course_name,
-            'course_id': course.id
+            'course_id': course.id,
+            'description': course.description,
+            'course_number': course.course_number
         }
         courses_list.append(course_dict)
 

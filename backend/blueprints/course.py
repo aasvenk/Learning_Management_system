@@ -1,5 +1,3 @@
-
-import datetime
 import os
 from datetime import datetime
 from operator import and_
@@ -450,7 +448,7 @@ def get_events_on_date(course_id):
     resp = []
     data = request.json
     dateStr = data["q_date"]
-    date = datetime.datetime.strptime(dateStr, '%Y-%m-%d').date()
+    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
     events = Events.query.filter_by(course_id=course_id).all()
     for event in events:
         start_date = event.start_time.date()
