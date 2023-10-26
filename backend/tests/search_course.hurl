@@ -12,7 +12,7 @@ access_token: jsonpath "$.access_token"
 POST http://localhost:8000/search/course
 Authorization: Bearer {{access_token}}
 {
-  "search": "applied",
+  "search": "Applied",
   "searchParam": "course_name"
 }
 HTTP 200

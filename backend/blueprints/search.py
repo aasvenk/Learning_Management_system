@@ -26,8 +26,6 @@ def searchCourse():
     if searchParam not in possible_params:
         return jsonify({"error": "Invalid searchParam. Allowed values are: course_number, course_name, description, instructor"}), 400
 
-
-
     if searchParam == "course_name":
         print(searchData, searchParam)
         courses = Courses.query.filter(Courses.course_name.like('%' + searchData + '%')).order_by(Courses.course_name).all()
