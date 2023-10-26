@@ -14,6 +14,7 @@ function StudentDashboard() {
     setValue(newValue);
   };
 
+
   return (
     <div>
       <Paper elevation={2} style={{ padding: "10px" }}>
@@ -24,7 +25,7 @@ function StudentDashboard() {
                 onChange={handleChange}
                 aria-label="lab API tabs example"
               >
-                <Tab label="All courses" value="1" />
+                <Tab label="All courses" value="1"/>
               </TabList>
             </Box>
             <TabPanel value="1"><CourseList /></TabPanel>

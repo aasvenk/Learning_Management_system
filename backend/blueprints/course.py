@@ -11,8 +11,7 @@ from werkzeug.utils import secure_filename
 from operator import and_
 from datetime import datetime
 
-
-from models import User, Courses, Enrollment, Events, CourseRequests
+from models import User, Courses, Enrollment, Events, Modules, CourseRequests
 from utils import convert_user_role, string_to_event_type
 from app import db
 from config import Configuration
@@ -663,3 +662,42 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower(
            ) in Configuration.ALLOWED_EXTENSIONS
+
+@course.route("/module/create", methods=["POST"])
+@jwt_required()
+def create_module():
+    # TODO: Only instructor should create a module
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = "Instructor"
+    if role == "Instructor":
+        data = request.json
+        course_id = data["course_id"]
+        module_name = data["module_name"]
+        modules = Modules(course_id=course_id, name=module_name)
+        try:
+            db.session.add(modules)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+
+        return make_response(jsonify(status="success", error=""), 200)
+    
+    else : 
+
+        return {"msg": "Only instructors have access to create a module"}
+
+
+@course.route("/course/<courseid>/getmodule", methods=["GET"])
+@jwt_required()
+def get_modules(courseid):
+    # TODO: Verify user has right role from the jwt token
+    modules = Modules.query.filter_by(course_id=courseid).all()
+    response = []
+    for m in modules:
+        response.append({
+            "id": m.id,
+            "course_id" :m.course_id,
+            "name": m.name
+        })
+    return make_response(jsonify(status="success", modules=response), 200)
