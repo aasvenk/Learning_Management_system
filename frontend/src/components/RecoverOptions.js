@@ -1,15 +1,15 @@
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from "axios";
 import React, { useState } from "react";
-import "./RecoverOptions.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {faArrowLeft}  from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom";
-import axios from "axios"
+import "./RecoverOptions.css";
 
 function RecoverOptions() {
   let [option, setOption] = useState("recover");
   let [email, setEmail] = useState("")
   let [emailError, setEmailError] = useState("")
-  let [errorMsg, setErrorMsg] = useState("")
+  // let [errorMsg, setErrorMsg] = useState("")
   let [securityAnswer, setSecurityAnswer] = useState("")
 
   const validateEmail = (email) => {
@@ -180,9 +180,9 @@ function RecoverOptions() {
   }
   return (
     <div>
-      {errorMsg && (
+      {/* {errorMsg && (
         <div className="error-message">{errorMsg}</div>
-      )}
+      )} */}
       {toRender}
     </div>
   );

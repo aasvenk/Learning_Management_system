@@ -1,15 +1,15 @@
-import { useParams } from "react-router-dom";
-import Paper from "@mui/material/Paper";
-import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Tab from "@mui/material/Tab";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import AppHeader from "../../components/AppHeader";
 import EventCalendar from "../../components/EventCalendar";
-import  "./CoursePage.css";
-import axios from "axios"
+import "./CoursePage.css";
 
 function CoursePage() {
   const [courseDetails, setCourseDetails] = useState({})
@@ -49,7 +49,7 @@ function CoursePage() {
     .catch((error) => {
       console.error(error)
     });
-  }, [])
+  }, [id])
 
   return (
     <div>

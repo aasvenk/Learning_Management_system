@@ -1,21 +1,20 @@
-import Paper from "@mui/material/Paper";
-import { useState } from "react";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
+import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
+import RemoveCircleTwoToneIcon from '@mui/icons-material/RemoveCircleTwoTone';
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import CourseList from "../../components/CourseList";
-import Table from '@mui/material/Table';
+import Box from "@mui/material/Box";
 import IconButton from '@mui/material/IconButton';
-import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
-import RemoveCircleTwoToneIcon from '@mui/icons-material/RemoveCircleTwoTone';
+import Paper from "@mui/material/Paper";
+import Tab from "@mui/material/Tab";
+import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import axios from 'axios';
+import { useState } from "react";
 
 export default function AdminDashboard(){
     const [value, setValue] = useState("1");
@@ -29,12 +28,12 @@ export default function AdminDashboard(){
         }
       }).then(response => {
         let data = response.data['courses']
-        if(data.length == 0){data[0] = {"id":"","course_number": "", "course_name" : "No pending requests", "description" : "", "instructor_id" : ""}; }
+        if(data.length === 0){data[0] = {"id":"","course_number": "", "course_name" : "No pending requests", "description" : "", "instructor_id" : ""}; }
         updateRequest(data);
 
       })
    }
-   if(requests.length == 0){
+   if(requests.length === 0){
     reloadRequests()
    }
     const acceptReq = (req) => {
@@ -66,7 +65,6 @@ export default function AdminDashboard(){
     const handleChange = (event, newValue) => {
       setValue(newValue);
     };
-    let initial_state = 0;
    
     return (<div>
 
@@ -112,8 +110,8 @@ export default function AdminDashboard(){
               <TableCell align="right">{row.instructor_id}</TableCell>
               <TableCell align="right">{row.course_number}</TableCell>
               <TableCell align="right">{row.description}</TableCell>
-              <TableCell  align="right"><IconButton disabled= {row.course_name == "No pending requests"} onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
-              <TableCell align="right"><IconButton  disabled= {row.course_name == "No pending requests"} onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell  align="right"><IconButton disabled= {row.course_name === "No pending requests"} onClick={() => acceptReq(row)}><AddCircleTwoToneIcon></AddCircleTwoToneIcon></IconButton></TableCell>
+              <TableCell align="right"><IconButton  disabled= {row.course_name === "No pending requests"} onClick ={() => denyReq(row)}><RemoveCircleTwoToneIcon></RemoveCircleTwoToneIcon></IconButton></TableCell>
             </TableRow>
           ))}
         </TableBody>
