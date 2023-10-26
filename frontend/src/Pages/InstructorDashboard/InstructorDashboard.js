@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { useState } from "react";
-
+import AddCourseRequest from "../../components/AddCourseRequest"
 function InstructorDashboard() {
   const [value, setValue] = useState("1");
 
@@ -17,6 +17,7 @@ function InstructorDashboard() {
           Instructor dashboard
         </Box>
       </Paper>
+      <AddCourseRequest></AddCourseRequest>
     </div>
   );
 }
