@@ -18,7 +18,6 @@ function DashboardPage() {
         },
       })
       .then((response) => {
-        console.log(response.data.userInfo);
         dispatch(setUserInfo(response.data.userInfo));
       })
       .catch((error) => {

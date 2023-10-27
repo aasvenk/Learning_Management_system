@@ -13,7 +13,7 @@ function InstructorDashboard() {
   return (
     <div>
       <Paper elevation={2} style={{ padding: "10px" }}>
-        <Box sx={{ width: "100%", typography: "body1" }}>
+        <Box sx={{ width: "100%"}}>
           Instructor dashboard
         </Box>
       </Paper>
