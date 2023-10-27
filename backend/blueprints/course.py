@@ -1,5 +1,3 @@
-
-import datetime
 import os
 from datetime import datetime
 from operator import and_
@@ -323,14 +321,15 @@ def getCourseRequests():
     return make_response({"courses" : the_response}, 200)
         
     
-@course.route("/makeCourseRequest", methods=["GET"])
+@course.route('/makeCourseRequest', methods=["POST"])
 @jwt_required()
-def courseRequests():
-    
+def makeCourseRequest():
+    print("youre here")
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
     role = convert_user_role(str(user.role))
-    course = request.json
+    course = request.json['course']
+    
     if role != "Instructor":
         return make_response(jsonify(msg="access denied"), 401)
     try:
@@ -338,8 +337,7 @@ def courseRequests():
         course_number = course['course_number']
         course_name = course['course_name']
         description = course['course_description']
-        instructor_id = course['instructor_id']
-        newRequest = CourseRequests(id=courseID, course_number=course_number, course_name=course_name, description=description, instructor_id=instructor_id)
+        newRequest = CourseRequests(id=courseID, course_number=course_number, course_name=course_name, description=description, instructor_id=user.id)
         db.session.add(newRequest)
         db.session.commit()
     except Exception as e:
@@ -450,7 +448,7 @@ def get_events_on_date(course_id):
     resp = []
     data = request.json
     dateStr = data["q_date"]
-    date = datetime.datetime.strptime(dateStr, '%Y-%m-%d').date()
+    date = datetime.strptime(dateStr, '%Y-%m-%d').date()
     events = Events.query.filter_by(course_id=course_id).all()
     for event in events:
         start_date = event.start_time.date()

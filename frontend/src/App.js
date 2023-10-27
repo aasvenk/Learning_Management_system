@@ -1,23 +1,24 @@
+import axios from "axios";
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import SignupPage from "./Pages/SignupPage";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import ChangePassword from "./Pages/ChangePassword";
+import CoursePage from "./Pages/CoursePage/CoursePage";
 import ForgotPassword from "./Pages/ForgotPasswordPage/ForgotPasswordPage";
-import ChangePassword from  "./Pages/ChangePassword"
-import CoursePage from  "./Pages/CoursePage/CoursePage"
 import HomePage from "./Pages/HomePage";
-import axios from "axios"
-import LoggedIn from './components/LoggedIn'
+import InstructorDashboard from "./Pages/InstructorDashboard/InstructorDashboard";
 import InstructorUpload from "./Pages/InstructorUpload";
+import SearchPage from './Pages/SearchPage';
+import SignupPage from "./Pages/SignupPage";
+import LoggedIn from './components/LoggedIn';
 import ModuleUI from "./components/ModuleUI";
-import InstructorDashboard  from "./Pages/InstructorDashboard/InstructorDashboard";
 import ModuleView from "./components/ModuleView";
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import TestPage from "./Pages/TestPage";
 import Logout from "./Pages/Logout";
+import TestPage from "./Pages/TestPage";
 
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
@@ -39,6 +40,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/loggedin" element={<LoggedIn />} />
         <Route path="/signup" element={<SignupPage />} />

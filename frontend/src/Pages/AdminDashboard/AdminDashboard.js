@@ -69,7 +69,7 @@ export default function AdminDashboard(){
     return (<div>
 
         <Paper elevation={2} style={{ padding: "10px" }}>
-          <Box sx={{ width: "100%", typography: "body1" }}>
+          <Box sx={{ width: "100%"}}>
             <TabContext value={value}>
               <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                 <TabList

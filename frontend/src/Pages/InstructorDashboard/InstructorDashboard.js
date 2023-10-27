@@ -1,12 +1,12 @@
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Tab from "@mui/material/Tab";
 import { useState } from "react";
-import ModuleUI from "../../components/ModuleUI";
 import CreateModule from "../../components/CreateModule";
+import ModuleUI from "../../components/ModuleUI";
 
 function InstructorDashboard() {
   const [value, setValue] = useState("1");
@@ -17,7 +17,7 @@ function InstructorDashboard() {
 
 
   return (
-    <div>
+  <div>
     <Paper elevation={2} style={{ padding: "10px" }}>
       <Box sx={{ width: "100%", typography: "body1" }}>
         <TabContext value={value}>
