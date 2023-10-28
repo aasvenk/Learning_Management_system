@@ -88,7 +88,7 @@ function CourseModulePage() {
                 {files.map((file, index) => {
                   return (
                     <ListItem key={index}>
-                      <a href={process.env.REACT_APP_BASE_URL +'/module/file/' + file.filepath}>{file.filename}</a>
+                      <a href={process.env.REACT_APP_BASE_URL +'/module/file/' + file.filepath} target="_blank" rel="noreferrer">{file.filename}</a>
                     </ListItem>
                   )}
                 )}

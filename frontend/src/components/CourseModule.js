@@ -56,7 +56,7 @@ function CourseModule() {
               <List>
                 {courseModules.map((module, index) => {
                   return (
-                    <ListItem>
+                    <ListItem key={index}>
                       <Link to={"/course/" + id + "/module/" + module.id}>
                         <ListItemText primary={module.name} />
                       </Link>
