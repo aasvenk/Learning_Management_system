@@ -6,12 +6,10 @@ import CoursePage from "./Pages/CoursePage/CoursePage";
 import ForgotPassword from "./Pages/ForgotPasswordPage/ForgotPasswordPage";
 import HomePage from "./Pages/HomePage";
 import InstructorDashboard from "./Pages/InstructorDashboard/InstructorDashboard";
-import InstructorUpload from "./Pages/InstructorUpload";
 import SearchPage from './Pages/SearchPage';
 import SignupPage from "./Pages/SignupPage";
+import CourseModule from "./components/CourseModule";
 import LoggedIn from './components/LoggedIn';
-import ModuleUI from "./components/ModuleUI";
-import ModuleView from "./components/ModuleView";
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -27,7 +25,7 @@ axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   if (error && error.response && error.response.data && error.response.data.msg === "Token has expired") {
-    alert("Token expired. Redirecting to login..")
+    // alert("Token expired. Redirecting to login..")
     window.location.assign("/logout")
     return
   }
@@ -48,9 +46,7 @@ function App() {
         <Route path = "/resetpassword" element = {<ChangePassword />} />
         <Route path = "/course/:id" element = {<CoursePage />} />
         <Route path = "/instructor" element = {<InstructorDashboard/>} /> 
-        <Route path = "/course/material" element = {<InstructorUpload />} /> 
-        <Route path = "/module" element = {<ModuleUI />} />
-        <Route path = "course/module" element = {<ModuleView />} />
+        <Route path = "course/module" element = {<CourseModule />} />
 
 
         <Route path = "/test" element = {<TestPage />} />
