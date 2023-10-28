@@ -2,13 +2,13 @@ import axios from "axios";
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ChangePassword from "./Pages/ChangePassword";
+import CourseModulePage from "./Pages/CourseModulePage";
 import CoursePage from "./Pages/CoursePage/CoursePage";
 import ForgotPassword from "./Pages/ForgotPasswordPage/ForgotPasswordPage";
 import HomePage from "./Pages/HomePage";
 import InstructorDashboard from "./Pages/InstructorDashboard/InstructorDashboard";
 import SearchPage from './Pages/SearchPage';
 import SignupPage from "./Pages/SignupPage";
-import CourseModule from "./components/CourseModule";
 import LoggedIn from './components/LoggedIn';
 
 import '@fontsource/roboto/300.css';
@@ -20,7 +20,7 @@ import TestPage from "./Pages/TestPage";
 
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
-
+axios.defaults.headers.common['Authorization'] =  "Bearer " + localStorage.getItem("hoosier_room_token")
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
@@ -46,7 +46,7 @@ function App() {
         <Route path = "/resetpassword" element = {<ChangePassword />} />
         <Route path = "/course/:id" element = {<CoursePage />} />
         <Route path = "/instructor" element = {<InstructorDashboard/>} /> 
-        <Route path = "course/module" element = {<CourseModule />} />
+        <Route path = "/course/:courseId/module/:moduleId" element = {<CourseModulePage />} />
 
 
         <Route path = "/test" element = {<TestPage />} />

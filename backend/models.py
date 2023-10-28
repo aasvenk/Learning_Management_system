@@ -1,6 +1,7 @@
-from app import db
-from werkzeug.security import generate_password_hash, check_password_hash
 from enum import Enum
+
+from app import db
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class UserRole(Enum):
@@ -66,6 +67,13 @@ class Modules(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     name = db.Column(db.String(120))
 
+class ModuleFiles(db.Model):
+    __tablename__ = 'module_files'
+    id = db.Column(db.Integer, primary_key = True)
+    module_id = db.Column(db.Integer, db.ForeignKey('modules.id'))
+    module = db.relationship('Modules', foreign_keys=[module_id])
+    file_name = db.Column(db.String(120))
+    file_path = db.Column(db.String(120))
 
 class Enrollment(db.Model):
     __tablename__ = 'enrollments'

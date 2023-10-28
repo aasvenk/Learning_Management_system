@@ -9,8 +9,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppHeader from "../../components/AppHeader";
 import CourseAnnoucements from "../../components/CourseAnnoucements";
+import CourseModule from "../../components/CourseModule";
 import EventCalendar from "../../components/EventCalendar";
-import "./CoursePage.css";
 
 function CoursePage() {
   const [courseDetails, setCourseDetails] = useState({})
@@ -42,7 +42,7 @@ function CoursePage() {
       <div> 
         <AppHeader />
       </div>
-      <div className="course-page">
+      <div className="page-container">
       <Paper elevation={2} style={{ padding: "10px" }}>
         <Box sx={{ width: "100%"}}>
           <TabContext value={value}>
@@ -51,9 +51,10 @@ function CoursePage() {
                 onChange={handleChange}
                 aria-label="lab API tabs example"
               >
-                <Tab label="Course Description" value="1" />
-                <Tab label = "Announcements" value = "2" /> 
-                <Tab label = "Calendar" value = "3" /> 
+                <Tab label="Home Page" value="1" />
+                <Tab label="Modules" value="2" />
+                <Tab label = "Announcements" value = "3" /> 
+                <Tab label = "Calendar" value = "4" /> 
               </TabList>
             </Box>
             <TabPanel value="1">
@@ -63,9 +64,12 @@ function CoursePage() {
               <div>
               {courseDetails.description} </div></TabPanel>
             <TabPanel value="2">
-              <CourseAnnoucements />
+              <CourseModule />
             </TabPanel>
             <TabPanel value="3">
+              <CourseAnnoucements />
+            </TabPanel>
+            <TabPanel value="4">
               <EventCalendar />
             </TabPanel>
           </TabContext>

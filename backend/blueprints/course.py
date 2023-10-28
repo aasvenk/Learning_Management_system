@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from operator import and_
+from secrets import token_urlsafe
 
 from app import db
 from config import Configuration
@@ -8,7 +9,7 @@ from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import (CourseRequests, Courses, Enrollment, Events, EventType,
-                    Modules, User)
+                    ModuleFiles, Modules, User)
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
@@ -550,6 +551,18 @@ def createEvent():
     db.session.commit()
     return make_response(jsonify(msg="Event Created"), 200)
 
+@course.route('/module/<module_id>/files', methods=["GET"])
+@jwt_required()
+def get_files(module_id):
+    resp = []
+    files = ModuleFiles.query.filter_by(module_id=module_id).all()
+    for file in files:
+        resp.append({
+            "filename": file.file_name,
+            "filepath": file.file_path,
+        })
+    return make_response(jsonify(files=resp), 200)
+
 @course.route('/module/file/upload', methods=["POST"])
 @jwt_required()
 def upload_module_file():
@@ -563,11 +576,15 @@ def upload_module_file():
     elif not allowed_file(file.filename):
         return make_response(jsonify(status="File type not allowed"), 400)
 
-    filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
-    filename = secure_filename(filename)
-    file.save(os.path.join('static/uploads', filename))
+    # filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
+    filename = secure_filename(file.filename)
+    filepath = token_urlsafe(16) + '.pdf'
+    file.save(os.path.join('static/uploads', filepath))
 
-    # TODO: Add to module model in database
+    db.session.add(
+        ModuleFiles(module_id = module_id, file_name=filename, file_path=filepath)
+    )
+    db.session.commit()
 
     return make_response(jsonify(status="success"), 200)
 
@@ -585,10 +602,9 @@ def allowed_file(filename):
 @course.route("/module/create", methods=["POST"])
 @jwt_required()
 def create_module():
-    # TODO: Only instructor should create a module
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
-    role = "Instructor"
+    role = convert_user_role(str(user.role))
     if role == "Instructor":
         data = request.json
         course_id = data["course_id"]
@@ -599,18 +615,13 @@ def create_module():
             db.session.commit()
         except Exception as e:
             print(e)
-
         return make_response(jsonify(status="success", error=""), 200)
-    
-    else : 
-
-        return {"msg": "Only instructors have access to create a module"}
+    return {"msg": "Only instructors have access to create a module"}
 
 
-@course.route("/course/<courseid>/getmodule", methods=["GET"])
+@course.route("/course/<courseid>/modules", methods=["GET"])
 @jwt_required()
 def get_modules(courseid):
-    # TODO: Verify user has right role from the jwt token
     modules = Modules.query.filter_by(course_id=courseid).all()
     response = []
     for m in modules:

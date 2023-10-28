@@ -5,27 +5,8 @@ import StudentDashboard from "./StudentDashboard/StudentDashboard";
 
 function DashboardPage() {
   const {role} = useSelector((state) => state.user.userInfo)
-  // const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   axios
-  //     .get("/userInfo", {
-  //       headers: {
-  //         Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),
-  //       },
-  //     })
-  //     .then((response) => {
-  //       dispatch(setUserInfo(response.data.userInfo));
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // });
 
   return (
-    // Get userInfo
-    // Based on role render correct dashboard page
-    // role?
     <div>
       {role === "Admin" && (<AdminDashboard />)}
       {role === "Instructor" && (<InstructorDashboard />)}

@@ -1,12 +1,16 @@
 import { Button, Grid, TextField, TextareaAutosize } from "@mui/material";
+import Box from "@mui/material/Box";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
+
 function CourseAnnoucements() {
-  const [count, setCount] = useState(0)
-  const {role} = useSelector((state) => state.user.userInfo)
+  const [isCreateMode, setIsCreateMode] = useState(false);
+  const [createModeLabel, setCreateModeLabel] = useState("Create annoucement");
+  const [count, setCount] = useState(0);
+  const { role } = useSelector((state) => state.user.userInfo);
   const [announcements, setannouncements] = useState([]);
   const { id } = useParams();
 
@@ -41,72 +45,91 @@ function CourseAnnoucements() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    formData['courseId'] = id
-    console.log(formData)
+    formData["courseId"] = id;
+    console.log(formData);
     axios
-    .post("/announcements/create", formData, {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),
-      },
-    })
-    .then((response) => {
-      if (response.status === 200) {
-        setCount(count + 1)
-      }
-    })
-    .catch((e) => {
-      console.log(e)
-      alert("Error creating annoucement")
-    });
+      .post("/announcements/create", formData, {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          alert("Annoucement created successfully")
+          setCount(count + 1)
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        alert("Error creating annoucement");
+      });
   };
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={6}>
-        <div>
-          {announcements.map((announcement, i) => {
-            return (
-              <div key={i} className="Announcement">
-                <h3>{announcement.title} </h3>
-                <div>{announcement.description}</div>
-              </div>
+    <Box sx={{ flexGrow: 1 }}>
+      {role === "Instructor" && (
+        <Button
+          color="primary"
+          onClick={() => {
+            setIsCreateMode(!isCreateMode);
+            setCreateModeLabel(
+              isCreateMode ? "Create annoucement" : "View annoucements"
             );
-          })}
-        </div>
-      </Grid>
-      <Grid item xs={6}>
-        {role === "Instructor" && (
+          }}
+        >
+          {createModeLabel}
+        </Button>
+      )}
+      <Grid container spacing={3} style={{ margin: "auto" }}>
+        <Grid item xs={6} style={{ margin: "auto", display: isCreateMode ? "none" : "block" }}>
           <div>
-          <h3>New announcement</h3>
-          <div style={{ width: 500 }}>
-            <form onSubmit={handleSubmit}>
-              <TextField
-                style={{ width: "100%", marginTop: 5 }}
-                label="Title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-              />
-  
-              <TextareaAutosize
-                style={{ width: "100%", marginTop: 5 }}
-                minRows={10}
-                maxRows={10}
-                placeholder="Description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-              />
-              <br />
-              <Button type="submit" variant="contained" color="primary">
-                Create
-              </Button>
-            </form>
+            {announcements.map((announcement, i) => {
+              return (
+                <div key={i} className="Announcement" style={{margin: 5, padding: 5}}>
+                  <h3>{announcement.title} </h3>
+                  <div>{announcement.description}</div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-        )}
+        </Grid>
+        <Grid 
+          item xs={6} 
+          style={{ margin: "auto", display: !isCreateMode ? "none" : "block" }}
+        >
+          {role === "Instructor" && (
+            <div>
+              <h3>New announcement</h3>
+              <div style={{ width: 500 }}>
+                <form onSubmit={handleSubmit}>
+                  <TextField
+                    style={{ width: "100%", marginTop: 5 }}
+                    label="Title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                  />
+
+                  <TextareaAutosize
+                    style={{ width: "100%", marginTop: 5 }}
+                    minRows={10}
+                    maxRows={10}
+                    placeholder="Description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                  <br />
+                  <Button type="submit" variant="contained" color="primary">
+                    Create
+                  </Button>
+                </form>
+              </div>
+            </div>
+          )}
+        </Grid>
       </Grid>
-    </Grid>
+    </Box>
   );
 }
 

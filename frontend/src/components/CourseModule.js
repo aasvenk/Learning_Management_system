@@ -1,44 +1,82 @@
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
+import { Grid } from "@mui/material";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Tab from "@mui/material/Tab";
-import { useState } from "react";
-import InstructorUpload from "../Pages/InstructorUpload";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Link, useParams } from "react-router-dom";
+import CreateModule from "./CreateModule";
 
+function CourseModule() {
+  const [isCreateMode, setIsCreateMode] = useState(false);
+  const [courseModules, setCourseModules] = useState([]);
+  const [createModeLabel, setCreateModeLabel] = useState("Create module");
+  const { id } = useParams();
+  const { role } = useSelector((state) => state.user.userInfo);
 
-function CourseModule (){
+  useEffect(() => {
+    axios
+      .get("/course/" + id + "/modules")
+      .then((resp) => {
+        const { modules } = resp.data;
+        console.log(modules);
+        setCourseModules(modules);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [isCreateMode]);
 
-    const [value, setValue] = useState("1");
-
-    const handleChange = (event, newValue) => {
-      setValue(newValue);
-    };
-  
-
-    return ( 
-        <div>
-        <Paper elevation={2} style={{ padding: "10px" }}>
-          <Box sx={{ width: "100%", typography: "body1" }}>
-            <TabContext value={value}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <TabList
-                  onChange={handleChange}
-                  aria-label="lab API tabs example"
-                >
-                  <Tab label="View all Materials" value="1"/>
-                  <Tab label = "Add a Material" value = "2"/>
-                </TabList>
-              </Box>
-              <TabPanel value="1"> <h1> Show all values </h1> </TabPanel>
-              <TabPanel value="2"><InstructorUpload /></TabPanel>
-            </TabContext>
-          </Box>
-        </Paper>
-      </div>
-    );
-
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+      {role === "Instructor" && (
+        <Button
+          color="primary"
+          onClick={() => {
+            setIsCreateMode(!isCreateMode);
+            setCreateModeLabel(isCreateMode ? "Create module" : "View modules");
+          }}
+        >
+          {createModeLabel}
+        </Button>
+      )}
+      <Grid container spacing={3} style={{ margin: "auto" }}>
+        <Grid
+          item
+          xs={12}
+          style={{ margin: "auto", display: isCreateMode ? "none" : "block" }}
+        >
+          {courseModules.length === 0 && <div>No modules</div>}
+          {courseModules.length > 0 && (
+            <div>
+              <h3>All modules</h3>
+              <List>
+                {courseModules.map((module, index) => {
+                  return (
+                    <ListItem>
+                      <Link to={"/course/" + id + "/module/" + module.id}>
+                        <ListItemText primary={module.name} />
+                      </Link>
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </div>
+          )}
+        </Grid>
+        <Grid
+          item
+          xs={8}
+          style={{ margin: "auto", display: !isCreateMode ? "none" : "block" }}
+        >
+          <CreateModule />
+        </Grid>
+      </Grid>
+    </Box>
+  );
 }
 
-export default CourseModule
+export default CourseModule;
