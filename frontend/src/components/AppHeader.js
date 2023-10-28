@@ -14,6 +14,9 @@ function AppHeader() {
   const userInfo = useSelector((state) => state.user.userInfo);
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      return
+    }
     axios
       .get("/userInfo", {
         headers: {

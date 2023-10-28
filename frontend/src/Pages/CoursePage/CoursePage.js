@@ -8,12 +8,12 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppHeader from "../../components/AppHeader";
+import CourseAnnoucements from "../../components/CourseAnnoucements";
 import EventCalendar from "../../components/EventCalendar";
 import "./CoursePage.css";
 
 function CoursePage() {
   const [courseDetails, setCourseDetails] = useState({})
-  const [announcements, setannouncements] = useState([])
   const { id } = useParams()
   const [value, setValue] = useState("1");
 
@@ -31,20 +31,6 @@ function CoursePage() {
     .then((response) => {
       const {courseDetails} = response.data
       setCourseDetails(courseDetails)
-    })
-    .catch((error) => {
-      console.error(error)
-    });
-
-    axios
-    .get("/announcements/" + id, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('hoosier_room_token')
-      }
-    })
-    .then((response) => {
-      const {announcements} = response.data
-      setannouncements(announcements)
     })
     .catch((error) => {
       console.error(error)
@@ -76,18 +62,8 @@ function CoursePage() {
               </div>
               <div>
               {courseDetails.description} </div></TabPanel>
-          
             <TabPanel value="2">
-              <div>
-                  {announcements.map((announcement, i) => { 
-                    return (
-                      <div key={i} className="Announcement">
-                        <h3>{announcement.title} </h3>
-                        <div>{announcement.description}</div>
-                      </div>
-                    );
-                  })}
-               </div>
+              <CourseAnnoucements />
             </TabPanel>
             <TabPanel value="3">
               <EventCalendar />

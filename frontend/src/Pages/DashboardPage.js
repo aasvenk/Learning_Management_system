@@ -1,29 +1,26 @@
-import axios from "axios";
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from "react-redux";
-import { setUserInfo } from "../slices/userSlice";
+import { useSelector } from "react-redux";
 import AdminDashboard from "./AdminDashboard/AdminDashboard";
 import InstructorDashboard from "./InstructorDashboard/InstructorDashboard";
 import StudentDashboard from "./StudentDashboard/StudentDashboard";
 
 function DashboardPage() {
   const {role} = useSelector((state) => state.user.userInfo)
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
-  useEffect(() => {
-    axios
-      .get("/userInfo", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),
-        },
-      })
-      .then((response) => {
-        dispatch(setUserInfo(response.data.userInfo));
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  });
+  // useEffect(() => {
+  //   axios
+  //     .get("/userInfo", {
+  //       headers: {
+  //         Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),
+  //       },
+  //     })
+  //     .then((response) => {
+  //       dispatch(setUserInfo(response.data.userInfo));
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // });
 
   return (
     // Get userInfo

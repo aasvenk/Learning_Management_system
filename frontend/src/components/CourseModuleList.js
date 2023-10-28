@@ -1,13 +1,13 @@
+import Box from '@mui/material/Box';
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Box from '@mui/material/Box';
 import { useNavigate } from "react-router-dom";
 
-function ModuleUI() {
+function CourseModuleList() {
     
     const navigate = useNavigate();
     const module_list = [
@@ -54,4 +54,4 @@ function ModuleUI() {
 }
 
 
-export default ModuleUI;
+export default CourseModuleList;

@@ -1,14 +1,6 @@
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import Button from "@mui/material/Button";
-import Input from "@mui/material/Input"
-import Typography from "@mui/material/Typography";
-import Box from '@mui/material/Box';
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios"
+import Input from "@mui/material/Input";
+import axios from "axios";
 
 export default function AddCourseRequest(){
     const showForm = () => {

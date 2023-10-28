@@ -1,14 +1,14 @@
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Tab from "@mui/material/Tab";
 import { useState } from "react";
-import InstructorUpload from "../Pages/InstructorUpload"
+import InstructorUpload from "../Pages/InstructorUpload";
 
 
-function ModuleView (){
+function CourseModule (){
 
     const [value, setValue] = useState("1");
 
@@ -41,4 +41,4 @@ function ModuleView (){
 
 }
 
-export default ModuleView
+export default CourseModule

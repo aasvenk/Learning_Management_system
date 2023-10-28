@@ -7,7 +7,8 @@ from config import Configuration
 from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from models import CourseRequests, Courses, Enrollment, Events, Modules, User
+from models import (CourseRequests, Courses, Enrollment, Events, EventType,
+                    Modules, User)
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
@@ -324,25 +325,48 @@ def getCourseRequests():
 @course.route('/makeCourseRequest', methods=["POST"])
 @jwt_required()
 def makeCourseRequest():
-    print("youre here")
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
     role = convert_user_role(str(user.role))
-    course = request.json['course']
+
+    course = request.json
     
     if role != "Instructor":
         return make_response(jsonify(msg="access denied"), 401)
     try:
-        courseID = course['ID']
         course_number = course['course_number']
         course_name = course['course_name']
         description = course['course_description']
-        newRequest = CourseRequests(id=courseID, course_number=course_number, course_name=course_name, description=description, instructor_id=user.id)
+        newRequest = CourseRequests(course_number=course_number, course_name=course_name, description=description, instructor_id=user.id)
         db.session.add(newRequest)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
         return make_response(jsonify(msg="error creating request, contact administrator"), 500)    
+    
+    return make_response(jsonify(msg="sent request"), 200)
+
+@course.route('/pendingRequests', methods=["GET"])
+@jwt_required()
+def get_pending_requests():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    role = convert_user_role(str(user.role))
+    
+    if role != "Instructor":
+        return make_response(jsonify(msg="access denied"), 401)
+    try:
+        reqs = CourseRequests.query.filter_by(instructor_id=user.id).all()
+        resp = []
+        for req in reqs:
+            resp.append({
+                'course_number': req.course_number,
+                'course_name': req.course_name,
+                'description': req.description,
+            })
+        return make_response(jsonify(course_reqs=resp), 200)
+    except Exception as e:
+        return make_response(jsonify(msg="error occurred"), 500)    
     
     return make_response(jsonify(msg="sent request"), 200)
 
@@ -457,6 +481,7 @@ def get_events_on_date(course_id):
             resp.append({
                 "id": event.id,
                 "name": event.event_name,
+                "type": event.event_type.value,
                 "start_time": event.start_time,
                 "end_time": event.end_time,
             })
