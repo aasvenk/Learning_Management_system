@@ -610,6 +610,11 @@ def create_module():
         course_id = data["course_id"]
         module_name = data["module_name"]
         modules = Modules(course_id=course_id, name=module_name)
+
+        course = Courses.query.get(course_id)
+        if not course:
+            return {"msg": "Course not found."}, 401
+        
         try:
             db.session.add(modules)
             db.session.commit()
