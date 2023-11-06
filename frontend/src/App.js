@@ -15,8 +15,10 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import ChatPage from "./Pages/ChatPage";
 import Logout from "./Pages/Logout";
 import TestPage from "./Pages/TestPage";
+
 
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
@@ -47,6 +49,7 @@ function App() {
         <Route path = "/course/:id" element = {<CoursePage />} />
         <Route path = "/instructor" element = {<InstructorDashboard/>} /> 
         <Route path = "/course/:courseId/module/:moduleId" element = {<CourseModulePage />} />
+        <Route path = "/chat" element = {<ChatPage />} />
 
 
         <Route path = "/test" element = {<TestPage />} />

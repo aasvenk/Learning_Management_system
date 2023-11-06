@@ -5,8 +5,9 @@ from config import Configuration
 from flask import Flask, make_response, redirect
 from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token, get_jwt,
-                                get_jwt_identity)
+                                get_jwt_identity, jwt_required)
 from flask_mail import Mail
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -21,11 +22,13 @@ cors = CORS(app, origins=[app.config["CROSS_ORIGIN_URL"]])
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
+socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="*")
+if __name__ == "__main__":
+    socketio.run()
 
 # Register blueprints
 from blueprints.auth import auth as auth_blueprint
-# Should be imported after db is initialized
-from models import User
 
 app.register_blueprint(auth_blueprint)
 
@@ -88,3 +91,11 @@ def resetdb_command():
     from utils import load_demo_data
     load_demo_data(db)
     print('Shiny!')
+
+# Chat functionality
+
+@socketio.on('new_message')
+@jwt_required()
+def handle_new_message(data):
+    print(get_jwt_identity())
+    print("Message: ", data)
