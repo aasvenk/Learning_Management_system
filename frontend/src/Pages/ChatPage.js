@@ -13,6 +13,7 @@ import {
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { useEffect, useState } from "react";
+import { socket } from "../socket";
 
 function ChatPage() {
   const [messageInputValue, setMessageInputValue] = useState("");
@@ -76,6 +77,7 @@ function ChatPage() {
   }
 
   const messageSent = (msg) => {
+    socket.emit('new_message', {data: messageInputValue})
     setMessageInputValue('')
     const newChatConversation = [...chatConversation]
     newChatConversation.push( {
