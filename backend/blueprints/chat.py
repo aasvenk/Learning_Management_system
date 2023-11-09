@@ -6,7 +6,7 @@ from utils import format_time_difference
 
 chat = Blueprint('chat', __name__)
 
-@chat.route('/roomHistory', methods=["GET"])
+@chat.route('/roomHistory', methods=["POST"])
 @jwt_required()
 def get_room_history():
     data = request.json

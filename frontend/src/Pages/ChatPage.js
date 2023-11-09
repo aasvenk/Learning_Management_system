@@ -1,3 +1,5 @@
+import axios from "axios";
+import { useParams } from "react-router-dom";
 import {
   Avatar,
   ChatContainer,
@@ -15,11 +17,14 @@ import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { useEffect, useState } from "react";
 import { socket } from "../socket";
 
+axios.defaults.headers.common['Authorization'] =  "Bearer " + localStorage.getItem("hoosier_room_token")
+
 function ChatPage() {
   const [messageInputValue, setMessageInputValue] = useState("");
   const [chatSideBar, setChatSideBar] = useState({})
   const [chatHeader, setChatHeader] = useState({})
   const [chatConversation, setChatConversation] = useState([])
+  const { roomID } = useParams();
 
   const roboIco =
     "https://gravatar.com/avatar/e667ebe7cfdae109d94f42b9f090f582?s=400&d=robohash&r=x";
@@ -54,23 +59,19 @@ function ChatPage() {
         }
       ]
     })
-    setChatConversation([
-      {
-        message: "First message",
-        sentTime: "15 mins ago",
-        sender: "Zoe",
-        direction: "incoming",
-        position: "normal"
-      },
-      {
-        message: "First reply",
-        sentTime: "15 mins ago",
-        sender: "Zoe",
-        direction: "outgoing",
-        position: "normal"
-      }
-    ])
-  }, [])
+    axios
+    .post('/roomHistory', {
+      room_id: 1
+    })
+      .then((resp) => {
+        const { messages } = resp.data
+        console.log(messages)
+        setChatConversation(resp.data["chatHistory"])
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  })
 
   const conversationChanged = (id) => {
     alert('Conversation changed to ' + id)
@@ -80,14 +81,27 @@ function ChatPage() {
     socket.emit('new_message', {data: messageInputValue})
     setMessageInputValue('')
     const newChatConversation = [...chatConversation]
-    newChatConversation.push( {
-      message: messageInputValue,
-      sentTime: "15 mins ago",
-      sender: "Zoe",
-      direction: "outgoing",
-      position: "normal"
+    // newChatConversation.push( {
+    //   message: messageInputValue,
+    //   sentTime: "15 mins ago",
+    //   sender: "Zoe",
+    //   direction: "outgoing",
+    //   position: "normal"
+    // })
+    axios
+    .post('/sentMessage', {
+      room_id: 1,
+      message: messageInputValue
     })
-    setChatConversation(newChatConversation)
+      .then((resp) => {
+        const { messages } = resp.data
+        console.log(messages)
+        setChatConversation(resp.data["chatHistory"])
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    // setChatConversation(newChatConversation)
   }
 
   return (
