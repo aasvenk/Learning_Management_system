@@ -2,6 +2,8 @@ from enum import Enum
 
 from app import db
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime
+from sqlalchemy import Column, DateTime
 
 
 class UserRole(Enum):
@@ -61,6 +63,26 @@ class Courses(db.Model):
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     instructor = db.relationship('User', foreign_keys=[instructor_id])
 
+class Messages(db.Model):
+    __tablename__ = 'messages'   
+    id = db.Column(db.Integer, primary_key = True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    sender = db.relationship('User', foreign_keys=[sender_id])
+    room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
+    sent_time = db.Column(DateTime, default=datetime.utcnow)
+    content = db.Column(db.String())
+
+class ChatRooms(db.Model):
+    __tablename__ = 'chat_rooms'
+    id = db.Column(db.Integer, primary_key = True)
+    room_name = db.Column(db.String())
+
+class ChatRoomEnrollment(db.Model):
+    __tablename__ = 'room_enrollment'
+    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
+
 class Modules(db.Model):
     __tablename__ = 'modules'
     id = db.Column(db.Integer, primary_key = True)
@@ -81,8 +103,6 @@ class Enrollment(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
 
-    #student = db.relationship('User', backref='enrollments')
-    # course = db.relationship('Courses', backref='enrollments')
 
 class PasswordRecovery(db.Model):
     __tablename__ = 'password_recovery'

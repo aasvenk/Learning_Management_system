@@ -143,7 +143,7 @@ def deleteCourse():
     if courseID == "":
         return {"msg": "Please verify courseID"}, 401
 
-    enrollments = Enrollment.query.filter_by(course_id=courseID).all()
+    enrollments_to_delete = Enrollment.query.filter_by(course_id=courseID).all()
 
     courses = Courses.query.filter_by(id=courseID).all()
 
@@ -156,13 +156,11 @@ def deleteCourse():
         db.session.delete(event)
     db.session.commit()
 
-    # Uncomment when adding students and removing students from enrollment APIs are created
+    if not courses:
+        return {"msg": "Could not find course."}, 401
 
-    # if not enrollments or not courses:
-        # return {"msg": "Could not find course."}, 401
-
-    # for enrollment in enrollments:
-        # db.session.delete(enrollment)
+    for enrollment in enrollments_to_delete:
+        db.session.delete(enrollment)
 
     for course in courses:
         db.session.delete(course)
@@ -371,23 +369,68 @@ def get_pending_requests():
     
     return make_response(jsonify(msg="sent request"), 200)
 
-@course.route('/updateStudents', methods=["PUT"])
-# @role_required(["Admin","Instructor"])
+@course.route('/enrollStudent', methods=["POST"])
 @jwt_required()
-def updateStudents():
-    courseID = request.json.get("courseID", None)
-    email = get_jwt_identity()
-    user = User.query.filter_by(email=email).first()
-    role = convert_user_role(str(user.role))
+def enrollStudent():
     data = request.json
 
-    if role == "Student":
-        return {"msg": "Students cannot update courses."}, 401
+    required_params = ["user_id","course_id"]
+    missing_params = [param for param in required_params if param not in data]
 
-    # ToDo Need to write an update function for the Enrollments model
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    courseID = data["course_id"]
+    userID = data["user_id"]
+
+    course = Courses.query.filter_by(id=courseID).first()
+
+    if not course:
+        return make_response(jsonify(msg="Course not found"), 401)
+    
+    user = User.query.filter_by(id=userID).first()
+
+    if not user:
+        return make_response(jsonify(msg="Student not found"), 401)
+    
+    new_enrollment = Enrollment(student_id=userID,course_id=courseID)
+
+    db.session.add(new_enrollment)
+    db.session.commit()
+
+    return make_response(jsonify(msg="Student Enrolled"), 200)
+
+@course.route('/unenrollStudent', methods=["DELETE"])
+@jwt_required()
+def unenrollStudent():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    data = request.json
+    role = convert_user_role(str(user.role))
+    
+
+    required_params = ["user_id","course_id"]
+
+    missing_params = [param for param in required_params if param not in data]
+
+    if missing_params:
+        return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
+    
+    courseID = data["course_id"]
+    userID = data["user_id"]
+
+    if role == "Student":
+        return {"msg": "Students cannot unenroll students."}, 401
+
+    enrollment = Enrollment.query.filter(Enrollment.course_id == courseID,Enrollment.student_id == userID).first()
+
+    if not enrollment:
+        return {"msg": "Could not find Enrollment Record."}, 401
+
+    db.session.delete(enrollment)
 
     db.session.commit()
-    return make_response(jsonify(msg="Course Updated"), 200)
+    return make_response(jsonify(msg="Student Unenrolled"), 200)
 
 
 @course.route('/courseEvents', methods=["GET"])

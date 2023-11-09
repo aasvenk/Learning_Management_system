@@ -53,6 +53,10 @@ from blueprints.search import search as search_blueprint
 
 app.register_blueprint(search_blueprint)
 
+from blueprints.chat import chat as chat_blueprint
+
+app.register_blueprint(chat_blueprint)
+
 @app.route('/')
 def hello():
     return make_response({"status": "RUNNING"}, 200)
