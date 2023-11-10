@@ -97,5 +97,12 @@ class CourseRequests(db.Model):
     description = db.Column(db.String())
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     instructor = db.relationship('User', foreign_keys=[instructor_id])
-    
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.String(50))
+    recipient = db.Column(db.String(50))
+    content = db.Column(db.String(200)) 
+
+
 
