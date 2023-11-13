@@ -1,8 +1,6 @@
+import axios from "axios";
 import { useEffect } from 'react';
-import axios from "axios"
-import { useSelector} from 'react-redux'
-import { setUserInfo } from '../slices/userSlice'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 
@@ -19,7 +17,7 @@ function Welcome() {
       })
       .then((response) => {
         console.log(response.data.userInfo)
-        dispatch(setUserInfo(response.data.userInfo))
+        // dispatch(setUserInfo(response.data.userInfo))
       })
       .catch((error) => {
         console.error(error)

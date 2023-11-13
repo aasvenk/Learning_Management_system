@@ -6,6 +6,7 @@ export const userSlice = createSlice({
     isLoggedIn: !!localStorage.getItem("hoosier_room_token"),
     token: localStorage.getItem("hoosier_room_token"),
     userInfo: {
+      id: '',
       firstName: '',
       lastName: '',
       role: '',
@@ -20,7 +21,8 @@ export const userSlice = createSlice({
       localStorage.setItem("hoosier_room_token", action.payload)
     },
     setUserInfo: (state, action) => {
-      let {firstName, lastName, role} = action.payload
+      let {id, firstName, lastName, role} = action.payload
+      state.userInfo.id = id
       state.userInfo.firstName = firstName
       state.userInfo.lastName = lastName
       state.userInfo.role = role

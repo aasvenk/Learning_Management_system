@@ -1,4 +1,28 @@
+from datetime import datetime
+
 from models import EventType
+
+
+def format_time_difference(sent_time):
+    current_time = datetime.utcnow()
+    time_difference = current_time - sent_time
+
+    # Calculate seconds, minutes, hours, and days
+    seconds = time_difference.total_seconds()
+    minutes = seconds / 60
+    hours = minutes / 60
+    days = hours / 24
+
+    if seconds < 60:
+        return f"{int(seconds)} seconds ago"
+    elif minutes < 1:
+        return "just now"
+    elif hours < 1:
+        return f"{int(minutes)} minutes ago"
+    elif days < 1:
+        return f"{int(hours)} hours ago"
+    else:
+        return f"{int(days)} days ago"
 
 def convert_user_role(role_str):
     if role_str == 'UserRole.STUDENT':

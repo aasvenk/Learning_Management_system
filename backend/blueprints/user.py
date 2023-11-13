@@ -1,6 +1,5 @@
-from flask import Blueprint, request, make_response, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
+from flask import Blueprint, jsonify, make_response, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import User
 from utils import convert_user_role
 
@@ -17,6 +16,7 @@ def get_user_info():
     
     response = {
         "userInfo": {
+            "id": user.id,
             "firstName": user.firstName,
             "lastName": user.lastName,
             "role" : role,

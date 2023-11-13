@@ -1,25 +1,24 @@
 import axios from "axios";
 import React from "react";
+import { useSelector } from 'react-redux';
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ChangePassword from "./Pages/ChangePassword";
+import ChatPage from "./Pages/ChatPage";
 import CourseModulePage from "./Pages/CourseModulePage";
 import CoursePage from "./Pages/CoursePage/CoursePage";
 import ForgotPassword from "./Pages/ForgotPasswordPage/ForgotPasswordPage";
 import HomePage from "./Pages/HomePage";
 import InstructorDashboard from "./Pages/InstructorDashboard/InstructorDashboard";
+import Logout from "./Pages/Logout";
 import SearchPage from './Pages/SearchPage';
 import SignupPage from "./Pages/SignupPage";
+import TestPage from "./Pages/TestPage";
 import LoggedIn from './components/LoggedIn';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import ChatPage from "./Pages/ChatPage";
-import Logout from "./Pages/Logout";
-import TestPage from "./Pages/TestPage";
-
-
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 axios.defaults.headers.common['Authorization'] =  "Bearer " + localStorage.getItem("hoosier_room_token")
@@ -36,6 +35,7 @@ axios.interceptors.response.use(function (response) {
 });
 
 function App() {
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn)
   return (
     <Router>
       <Routes>
@@ -49,7 +49,7 @@ function App() {
         <Route path = "/course/:id" element = {<CoursePage />} />
         <Route path = "/instructor" element = {<InstructorDashboard/>} /> 
         <Route path = "/course/:courseId/module/:moduleId" element = {<CourseModulePage />} />
-        <Route path = "/chat" element = {<ChatPage />} />
+        <Route path = "/chat" element = {isLoggedIn ? <ChatPage /> : (<h2> Login to access chat </h2>)} />
 
 
         <Route path = "/test" element = {<TestPage />} />
