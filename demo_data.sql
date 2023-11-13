@@ -1,7 +1,11 @@
-DELETE FROM courses;
+DELETE FROM events;
 DELETE FROM enrollments;
 DELETE FROM announcements;
-DELETE FROM events;
+DELETE FROM courses;
+DELETE FROM room_enrollment;
+DELETE FROM chat_messages;
+DELETE FROM chat_rooms;
+
 
 ALTER SEQUENCE courses_id_seq RESTART WITH 101;
 
@@ -68,3 +72,31 @@ INSERT INTO announcements(course_id, title, description) VALUES
 INSERT INTO events(event_name, event_type, start_time, end_time, repeating_weekly, course_id) VALUES
 ('Class', 'CLASS','2023-08-22 09:45:00', '2023-08-22 11:00:00', TRUE, 101),
 ('Class', 'CLASS','2023-08-24 09:45:00', '2023-08-24 11:00:00', TRUE, 101);
+
+
+-- When a course is created new chat room for that course is created
+ALTER SEQUENCE chat_rooms_id_seq RESTART WITH 1;
+
+INSERT INTO chat_rooms(room_type, room_name) VALUES
+('COURSE', 'Introduction to Programming'),
+('COURSE', 'Web Development Fundamentals'),
+('COURSE', 'Digital Marketing Essentials');
+
+-- When student is enrolled into a course he is added to course chat room
+INSERT INTO room_enrollment(user_id, room_id) VALUES
+(2, 1),
+(3, 1),
+(4, 1),
+(2, 2),
+(3, 2),
+(4, 2),
+(2, 3),
+(3, 3),
+(4, 3);
+
+INSERT INTO chat_messages(sender_id, room_id, content, sent_time) VALUES
+(1, 1, 'Welcome', timezone('utc', now())),
+(1, 2, 'Welcome', timezone('utc', now())),
+(1, 3, 'Welcome', timezone('utc', now()));
+
+

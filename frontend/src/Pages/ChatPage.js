@@ -8,14 +8,22 @@ import {
   Message,
   MessageInput,
   MessageList,
+  MessageSeparator,
   Sidebar
 } from "@chatscope/chat-ui-kit-react";
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import axios from "axios";
 import { useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
+import AppHeader from "../components/AppHeader";
 import { socket } from "../socket";
 
+
+
 function ChatPage() {
+  const userInfo = useSelector((state) => state.user.userInfo)
+
   const [messageInputValue, setMessageInputValue] = useState("");
   const [chatSideBar, setChatSideBar] = useState({})
   const [chatHeader, setChatHeader] = useState({})
@@ -25,102 +33,94 @@ function ChatPage() {
     "https://gravatar.com/avatar/e667ebe7cfdae109d94f42b9f090f582?s=400&d=robohash&r=x";
 
   useEffect(() => {
-    setChatHeader({
-      name: "Applied Algorithms",
-      info: "10 online"
-    })
-    setChatSideBar({
-      "group_msgs": [
-        {
-          name: "Applied Algorithms",
-          lastSenderName: "Aashish",
-          info: "When is exam?",
-          unreadCnt: 1,
-          status: "unavailable",
-        },
-        {
-          name: "Software engineering",
-          lastSenderName: "Chip",
-          info: "Chat!!!",
-          unreadCnt: 0,
-          status: "available",
-        }
-      ],
-      "direct_msgs": [
-        {
-          name: "Chip",
-          info: "Chat progress",
-          status: "unavailable"
-        }
-      ]
-    })
-    setChatConversation([
-      {
-        message: "First message",
-        sentTime: "15 mins ago",
-        sender: "Zoe",
-        direction: "incoming",
-        position: "normal"
-      },
-      {
-        message: "First reply",
-        sentTime: "15 mins ago",
-        sender: "Zoe",
-        direction: "outgoing",
-        position: "normal"
+    axios
+    .get('/chatRooms/all')
+    .then((res) => {
+      setChatSideBar(res.data)
+      console.log(res.data)
+      if (res.data.course_rooms.length > 0) {
+        conversationChanged(res.data.course_rooms[0].room_id, res.data.course_rooms[0].room_name)
       }
-    ])
-  }, [])
-
-  const conversationChanged = (id) => {
-    alert('Conversation changed to ' + id)
-  }
-
-  const messageSent = (msg) => {
-    socket.emit('new_message', {data: messageInputValue})
-    setMessageInputValue('')
-    const newChatConversation = [...chatConversation]
-    newChatConversation.push( {
-      message: messageInputValue,
-      sentTime: "15 mins ago",
-      sender: "Zoe",
-      direction: "outgoing",
-      position: "normal"
     })
-    setChatConversation(newChatConversation)
+    .catch((err) => {
+      console.log(err)
+    })
+  }, [setChatSideBar])
+
+  useEffect(() => {
+    function onReceiveMessage(message) {
+      if (message.room_id !== chatHeader.room_id) {
+        return;
+      }
+      const newChatConversation = [...chatConversation]
+      newChatConversation.push( {
+        message: message.content,
+        sentTime: message.sentTime,
+        sender: message.sender,
+        sender_id: message.sender_id
+      })
+      setChatConversation(newChatConversation)
+    }
+
+    socket.on('receive_message', onReceiveMessage);
+
+    return () => {
+      socket.off('receive_message', onReceiveMessage);
+    };
+  }, [chatConversation, chatHeader.room_id]);
+
+  const conversationChanged = (room_id, room_name) => {
+    setChatHeader({
+      name: room_name,
+      room_id: room_id
+    })
+    axios.get('/chatMessages/' + room_id)
+    .then((res) => {
+      const {messages} = res.data
+      setChatConversation(messages)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
   }
 
+  const messageSent = () => {
+    socket.emit('send_message', {content: messageInputValue, room_id: chatHeader.room_id})
+    setMessageInputValue('')
+    
+  }
   return (
     <div
+      className="page-container"
       style={{
-        height: "100vh",
+        height: "94vh",
         position: "relative",
       }}
     >
+      <AppHeader />
       <MainContainer responsive>
         <Sidebar position="left" scrollable={false}>
           <ConversationList>
             <h3 style={{ marginLeft: 10 }}> Classes </h3>
-            {chatSideBar["group_msgs"] && chatSideBar["group_msgs"].map((item, index) => {
+            {chatSideBar["course_rooms"] && chatSideBar["course_rooms"].map((item, index) => {
               return (
                 <Conversation
-                  onClick={(event) => conversationChanged('conversation-id-' + index)}
+                  onClick={(event) => conversationChanged(item.room_id, item.room_name)}
                   key={'group_' + index}
-                  name={item.name}
+                  name={item.room_name}
                   lastSenderName={item.lastSenderName}
                   info={item.info}
-                  status={item.status}
+                  status={'available'}
                   unreadCnt={item.unreadCnt}
                 >
-                  <Avatar src={roboIco} name={item.name} status={item.status} />
                 </Conversation>
               );
             })}
-            <h3 style={{ marginLeft: 10 }}> Direct Messages </h3>
-            {chatSideBar["group_msgs"] && chatSideBar["direct_msgs"].map((item, index) => {
+            {/* <h3 style={{ marginLeft: 10 }}> Direct Messages </h3>
+            {chatSideBar["direct_rooms"] && chatSideBar["direct_rooms"].map((item, index) => {
               return (
                 <Conversation
-                  onClick={(event) => conversationChanged('conversation-id-' + index)}
+                  onClick={(event) => conversationChanged(item.room_id, item.room_name)}
                   key={'direct_' + index}
                   name={item.name}
                   lastSenderName={item.lastSenderName}
@@ -128,10 +128,9 @@ function ChatPage() {
                   status={item.status}
                   unreadCnt={item.unreadCnt}
                 >
-                  <Avatar src={roboIco} name={item.name} status={item.status} />
                 </Conversation>
               );
-            })}
+            })} */}
           </ConversationList>
         </Sidebar>
 
@@ -147,6 +146,13 @@ function ChatPage() {
           <MessageList>
             {
               chatConversation.map((item, index) => {
+                if (item.sender === "Admin") {
+                  return (
+                    <MessageSeparator key={'chat_msg_' + index}>
+                      {'Admin says ' + item.message}
+                    </MessageSeparator>
+                  )
+                }
                 return (
                   <Message
                     key={'chat_msg_' + index}
@@ -154,11 +160,12 @@ function ChatPage() {
                       message: item.message,
                       sentTime: item.sentTime,
                       sender: item.sender,
-                      direction: item.direction,
-                      position: item.position,
+                      direction: (item.sender_id === userInfo.id) ? 'outgoing': 'incoming',
+                      postion: 'normal'
                     }}
                   >
-                    <Avatar src={roboIco} name="Zoe" />
+                    <Avatar src={'https://ui-avatars.com/api/?name=' + item.sender} name={item.sender} />
+                    {/* <Message.Header sender={item.sender} sentTime={item.sentTime} /> */}
                   </Message>
                 )
               })
@@ -168,7 +175,7 @@ function ChatPage() {
             placeholder="Type message here"
             value={messageInputValue}
             onChange={(val) => setMessageInputValue(val)}
-            onSend={() => messageSent("")}
+            onSend={() => messageSent()}
             attachButton={false}
           />
         </ChatContainer>

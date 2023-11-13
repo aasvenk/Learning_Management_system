@@ -1,6 +1,8 @@
+from datetime import datetime
 from enum import Enum
 
 from app import db
+from sqlalchemy import Column, DateTime
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -13,6 +15,13 @@ class EventType(Enum):
     CLASS = 'Class'
     DISCUSSION = 'Discussion'
     LAB = 'Lab'
+
+    def as_string(self):
+        return self.value
+
+class ChatType(Enum):
+    COURSE = 'Course'
+    DIRECT = 'Direct'
 
     def as_string(self):
         return self.value
@@ -97,5 +106,27 @@ class CourseRequests(db.Model):
     description = db.Column(db.String())
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     instructor = db.relationship('User', foreign_keys=[instructor_id])
+
+class ChatMessages(db.Model):
+    __tablename__ = 'chat_messages'   
+    id = db.Column(db.Integer, primary_key = True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    sender = db.relationship('User', foreign_keys=[sender_id])
+    room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
+    sent_time = db.Column(DateTime, default=datetime.utcnow)
+    content = db.Column(db.String())
+
+class ChatRooms(db.Model):
+    __tablename__ = 'chat_rooms'
+    id = db.Column(db.Integer, primary_key = True)
+    room_type = db.Column(db.Enum(ChatType), nullable=False)
+    room_name = db.Column(db.String())
+
+class ChatRoomEnrollment(db.Model):
+    __tablename__ = 'room_enrollment'
+    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
+    room = db.relationship('ChatRooms', foreign_keys=[room_id])
     
 

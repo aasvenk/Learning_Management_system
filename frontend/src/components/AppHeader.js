@@ -1,3 +1,4 @@
+import ChatIcon from '@mui/icons-material/Chat';
 import Search from "@mui/icons-material/Search";
 import Button from "@mui/material/Button";
 import axios from "axios";
@@ -29,7 +30,7 @@ function AppHeader() {
       .catch((error) => {
         console.error(error);
       });
-  });
+  }, [dispatch, isLoggedIn]);
 
   const handleSearch = () => {
     navigation("/search")
@@ -56,6 +57,13 @@ function AppHeader() {
               type="submit"
               onClick={handleSearch}
               startIcon={<Search />}>Search</Button>
+
+            <Button
+              style={{ marginRight: "10px" }}
+              variant="text"
+              color="primary"
+              onClick={() => navigation("/chat")}
+              startIcon={<ChatIcon />}>Chat</Button>
               
             <Button variant="contained" disableElevation onClick={handleLogout}>
               Logout

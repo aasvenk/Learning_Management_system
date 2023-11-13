@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_jwt_extended import (JWTManager, create_access_token, get_jwt,
                                 get_jwt_identity, jwt_required)
 from flask_mail import Mail
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit, join_room, leave_room, send
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -53,6 +53,10 @@ from blueprints.search import search as search_blueprint
 
 app.register_blueprint(search_blueprint)
 
+from blueprints.chat import chat as chat_blueprint
+
+app.register_blueprint(chat_blueprint)
+
 @app.route('/')
 def hello():
     return make_response({"status": "RUNNING"}, 200)
@@ -94,8 +98,51 @@ def resetdb_command():
 
 # Chat functionality
 
-@socketio.on('new_message')
+from models import ChatMessages, ChatRoomEnrollment, User
+from utils import format_time_difference
+
+
+@socketio.on('send_message')
 @jwt_required()
-def handle_new_message(data):
-    print(get_jwt_identity())
-    print("Message: ", data)
+def handle_send_message(data):
+    content = data['content']
+    room_id = data['room_id']
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+
+    m = ChatMessages(content=content, sent_time=datetime.utcnow(), sender_id=user.id, room_id=room_id)
+    db.session.add(m)
+    db.session.commit()
+    
+    message = {}
+    message['content'] = m.content
+    message['sentTime'] = format_time_difference(m.sent_time)
+    message['sender'] = user.firstName
+    message['sender_id'] = user.id
+    message['room_id'] = room_id
+    print('room_' + str(room_id))
+    emit('receive_message', message, to='room_' + str(room_id))
+    print("Message: ", data, user)
+
+@socketio.on('connect')
+@jwt_required()
+def on_connect():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    # Join all the course rooms
+    enrollments = ChatRoomEnrollment.query.filter_by(user_id=user.id).all()
+    for e in enrollments:
+        print('room_' + str(e.room.id))
+        join_room('room_' + str(e.room.id))
+    print('Connected', email)
+
+@socketio.on('disconnect')
+@jwt_required()
+def on_disconnect():
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    # Leave all the course rooms
+    rooms = ChatRoomEnrollment.query.filter_by(user_id=user.id).all()
+    for room in rooms:
+        leave_room('room_' + str(room.id))
+    print('Client disconnected', email)
