@@ -45,11 +45,11 @@ def get_course_info():
 
     courses = []
 
-    # If the user has the admin role they recieves all courseIDs
+    # If the user has the admin role they receives all courseIDs
     if role == "Admin":
         courses = Courses.query.all()
 
-    # If the user has instructor role they recieve all courses they are the instructor of
+    # If the user has instructor role they receive all courses they are the instructor of
     if role == "Instructor":
         courses = Courses.query.filter_by(instructor_id=userID).all()
 
@@ -679,3 +679,29 @@ def get_modules(courseid):
             "name": m.name
         })
     return make_response(jsonify(status="success", modules=response), 200)
+
+@course.route("/getClassmates/<courseid>", methods=["GET"])
+@jwt_required()
+def getClassmates(courseid):
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    if(Enrollment.query.filter_by(student_id= user.id, course_id = courseid) == None):
+        return make_response(jsonify(message="access denied"), 401)
+    response = []
+    teacher_id = Courses.query.get(courseid).instructor_id
+    if teacher_id != user.id:
+        teacher = User.query.get(teacher_id)
+        response.append({
+            "user_id" : teacher.id,
+            "name" : teacher.firstName + " " + teacher.lastName
+        })
+    classmate_ids = Enrollment.query.filter_by(course_id = courseid)
+    
+    for classmate in classmate_ids:
+        if(classmate.student_id != user.id):
+            mateInfo = User.query.get(classmate.student_id)
+            response.append({
+                "user_id" : mateInfo.id,
+                "name" : mateInfo.firstName + " " + mateInfo.lastName
+            })
+    return make_response(jsonify(mates =response), 200 )    

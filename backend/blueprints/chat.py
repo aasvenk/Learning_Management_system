@@ -128,7 +128,9 @@ def roomUnenroll():
 @chat.route('/createRoom/directMessage', methods=["POST"])
 @jwt_required()
 def create_DM():
-    data = request.json
+    data = request.get_json()
+    print("dataaaaaaa" )
+    print(data)
     email = get_jwt_identity()
     user = User.query.filter_by(email=email).first()
     userID = user.id
@@ -138,7 +140,7 @@ def create_DM():
 
     if missing_params:
         return jsonify({"error": f"Missing parameters: {', '.join(missing_params)}"}), 400
-    
+    print("getting here")
     recipientID = data["recipient_id"]
 
     recipient = User.query.filter_by(id=recipientID).first()
@@ -147,12 +149,14 @@ def create_DM():
         return make_response(jsonify(msg="Recipient not found"), 401)
     
     room_name = user.firstName + " " + user.lastName + " and " + recipient.firstName + " " + recipient.lastName + "'s Chat Room"
+    the_room = ChatRooms.query.filter_by(room_name=room_name).first()
+    if the_room != None:
+        return make_response(jsonify({"error" : "chat room already exists"}), 333)    
+    
     
     new_room = ChatRooms(room_name=room_name)
-
     db.session.add(new_room)
     db.session.commit()
-
     new_room_id = new_room.id
 
     sender_user = ChatRoomEnrollment(user_id=userID,room_id=new_room_id)

@@ -12,7 +12,7 @@ import {
   MessageList,
   Sidebar
 } from "@chatscope/chat-ui-kit-react";
-
+import ComposeMessage from '../components/ComposeMessage';
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { useEffect, useState } from "react";
 import { socket } from "../socket";
@@ -59,18 +59,18 @@ function ChatPage() {
         }
       ]
     })
-    axios
-    .post('/roomHistory', {
-      room_id: 1
-    })
-      .then((resp) => {
-        const { messages } = resp.data
-        console.log(messages)
-        setChatConversation(resp.data["chatHistory"])
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+     axios
+     .post('/roomHistory', {
+       room_id: 1
+     })
+       .then((resp) => {
+         const { messages } = resp.data
+         console.log(messages)
+         setChatConversation(resp.data["chatHistory"])
+       })
+       .catch((err) => {
+         console.log(err);
+       });
   })
 
   const conversationChanged = (id) => {
@@ -113,7 +113,11 @@ function ChatPage() {
     >
       <MainContainer responsive>
         <Sidebar position="left" scrollable={false}>
+      
+          <ComposeMessage></ComposeMessage>
+           
           <ConversationList>
+          
             <h3 style={{ marginLeft: 10 }}> Classes </h3>
             {chatSideBar["group_msgs"] && chatSideBar["group_msgs"].map((item, index) => {
               return (
@@ -186,7 +190,9 @@ function ChatPage() {
             attachButton={false}
           />
         </ChatContainer>
+        
       </MainContainer>
+      
     </div>
   );
 }
