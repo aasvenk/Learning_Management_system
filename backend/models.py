@@ -128,5 +128,10 @@ class ChatRoomEnrollment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
     room = db.relationship('ChatRooms', foreign_keys=[room_id])
-    
-
+class Grades(db.Model):
+    __tablename__ = 'grades'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(),nullable=False)
+    value = db.Column(db.String(), nullable=False)
+    course_id = db.Column(db.Integer,db.ForeignKey('courses.id'),nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))

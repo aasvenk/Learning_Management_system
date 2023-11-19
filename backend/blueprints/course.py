@@ -9,7 +9,7 @@ from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import (CourseRequests, Courses, Enrollment, Events, EventType,
-                    ModuleFiles, Modules, User)
+                    ModuleFiles, Modules, User, Grades)
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
@@ -636,3 +636,18 @@ def get_modules(courseid):
             "name": m.name
         })
     return make_response(jsonify(status="success", modules=response), 200)
+
+@course.route("/course/<courseid>/getgrades", methods = ["GET"])
+@jwt_required()
+def get_grades(courseid):
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    userID = user.id
+    try:
+        grade = Grades.query.filter_by(user_id=userID,course_id=courseid).all()
+        result = [
+                {"course_id": grades.course_id, "title": grades.name, "graded_result": grades.value}
+                for grades in grade]
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
