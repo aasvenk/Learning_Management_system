@@ -11,8 +11,12 @@ import AppHeader from "../../components/AppHeader";
 import CourseAnnoucements from "../../components/CourseAnnoucements";
 import CourseModule from "../../components/CourseModule";
 import EventCalendar from "../../components/EventCalendar";
+import Grades from "../../components/Grades";
+import { useSelector } from "react-redux";
+
 
 function CoursePage() {
+  const { role } = useSelector((state) => state.user.userInfo);
   const [courseDetails, setCourseDetails] = useState({})
   const { id } = useParams()
   const [value, setValue] = useState("1");
@@ -55,6 +59,7 @@ function CoursePage() {
                 <Tab label="Modules" value="2" />
                 <Tab label = "Announcements" value = "3" /> 
                 <Tab label = "Calendar" value = "4" /> 
+                <Tab label = "Grades" value = "5" />
               </TabList>
             </Box>
             <TabPanel value="1">
@@ -71,6 +76,9 @@ function CoursePage() {
             </TabPanel>
             <TabPanel value="4">
               <EventCalendar />
+            </TabPanel>
+            <TabPanel value = "5">
+              <Grades /> 
             </TabPanel>
           </TabContext>
         </Box>
