@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import * as React from 'react'
 import { Alert } from '@mui/material';
 
-export default function ComposeMessage(){
+export default function ComposeMessage(props){
     const [status, setStatus] = useState({hidden : true, msg : "", severity : ""})
     const [courses, setCourses] = useState([])
     const [isOpen, setOpen] = useState(false)
@@ -24,6 +24,7 @@ export default function ComposeMessage(){
       }).then( (res) => {
         if(res.status === 200){
           setStatus({hidden : false, msg : "Created the chat room!", severity : "success"})
+          props.updateParent();
         }
         
       }).catch((error) => {

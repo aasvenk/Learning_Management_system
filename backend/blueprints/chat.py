@@ -254,7 +254,9 @@ def create_course_room():
         return make_response(jsonify(msg="Course not found"), 401)
     
     room_name = course.course_number + " " + course.course_name + " Class ChatRoom"
-    
+    the_room = ChatRooms.query.filter_by(room_name=room_name).first()
+    if the_room != None:
+        return make_response(jsonify({"error" : "chat room already exists"}), 333) 
     new_room = ChatRooms(room_name=room_name)
 
     db.session.add(new_room)
