@@ -650,7 +650,7 @@ def get_grades(courseid):
                 for grades in grade]
         return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}, 500)
 
 @course.route("/getClassmates/<courseid>", methods=["GET"])
 @jwt_required()
