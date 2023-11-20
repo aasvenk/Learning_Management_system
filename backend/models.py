@@ -70,6 +70,24 @@ class Courses(db.Model):
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     instructor = db.relationship('User', foreign_keys=[instructor_id])
 
+class Assignments(db.Model):
+    __tablename__ = 'assignments'   
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String())
+    description = db.Column(db.String())
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+
+class Submissions(db.Model):
+    __tablename__ = 'submissions'   
+    id = db.Column(db.Integer, primary_key = True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignment.id'))
+    description = db.Column(db.String(),default="")
+    file_path = db.Column(db.String(120))
+
+
+
+
+
 class Modules(db.Model):
     __tablename__ = 'modules'
     id = db.Column(db.Integer, primary_key = True)
