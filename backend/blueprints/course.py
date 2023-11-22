@@ -637,6 +637,7 @@ def get_modules(courseid):
         })
     return make_response(jsonify(status="success", modules=response), 200)
 
+## get grades for Student login
 @course.route("/course/<courseid>/getgrades", methods = ["GET"])
 @jwt_required()
 def get_grades(courseid):
@@ -677,3 +678,59 @@ def getClassmates(courseid):
                 "name" : mateInfo.firstName + " " + mateInfo.lastName
             })
     return make_response(jsonify(mates =response), 200 )
+
+
+
+## get grades of all students enrolled for a particular course on instructor Grades page
+@course.route("/course/<courseid>/instgetgrades", methods=["GET"])
+@jwt_required()
+def get_grades_inst(courseid):
+    email = get_jwt_identity()
+    students = User.query.filter_by(role="STUDENT").all()
+
+    try:
+        results = []
+        for student in students:
+            grade = Grades.query.filter_by(user_id=student.id, course_id=courseid).all()
+            for g in grade:
+                result = {
+                    "user_id": student.id,
+                    "user_email":student.email,
+                    "course_id": g.course_id,
+                    "title": g.name,
+                    "graded_result": g.value
+                }
+                results.append(result)
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}, 500)
+    
+    
+
+### Publish grades by instructor by giving student id and assignment name and grade value for a particular course by instructor 
+@course.route("/course/<courseid>/publishgrades", methods=["POST"])
+@jwt_required()
+def publish_grades(courseid):
+    current_user_id = get_jwt_identity()
+
+    data = request.get_json()
+    
+    if "grades" not in data or not isinstance(data["grades"], list):
+        return jsonify({"message": "Invalid data format"}), 400
+
+    for grade_data in data["grades"]:
+        name = grade_data.get("name")
+        value = grade_data.get("value")
+        user_id = grade_data.get("user_id")
+
+        new_grade = Grades(name=name, value=value, course_id=courseid, user_id=user_id)
+
+        db.session.add(new_grade)
+    db.session.commit()
+
+    return jsonify({"message": "Grades published successfully"}), 201
+
+    
+    
+
+    
