@@ -9,7 +9,7 @@ from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import (CourseRequests, Courses, Enrollment, Events, EventType,
-                    ModuleFiles, Modules, User, Grades)
+                    Grades, ModuleFiles, Modules, User)
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
