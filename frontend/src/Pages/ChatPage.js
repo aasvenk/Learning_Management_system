@@ -11,7 +11,7 @@ import {
   MessageSeparator,
   Sidebar
 } from "@chatscope/chat-ui-kit-react";
-
+import ComposeMessage from '../components/ComposeMessage';
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -28,7 +28,10 @@ function ChatPage() {
   const [chatSideBar, setChatSideBar] = useState({})
   const [chatHeader, setChatHeader] = useState({})
   const [chatConversation, setChatConversation] = useState([])
-
+  const [fromChild, setChildState] = useState(0)
+  const refreshFromChild = () => {
+    setChildState(fromChild + 1)
+  }
   const roboIco =
     "https://gravatar.com/avatar/e667ebe7cfdae109d94f42b9f090f582?s=400&d=robohash&r=x";
 
@@ -45,7 +48,7 @@ function ChatPage() {
     .catch((err) => {
       console.log(err)
     })
-  }, [setChatSideBar])
+  }, [setChatSideBar, fromChild])
 
   useEffect(() => {
     function onReceiveMessage(message) {
@@ -100,6 +103,7 @@ function ChatPage() {
       <AppHeader />
       <MainContainer responsive>
         <Sidebar position="left" scrollable={false}>
+        <ComposeMessage updateParent= {() => refreshFromChild()}></ComposeMessage>
           <ConversationList>
             <h3 style={{ marginLeft: 10 }}> Classes </h3>
             {chatSideBar["course_rooms"] && chatSideBar["course_rooms"].map((item, index) => {
@@ -116,13 +120,13 @@ function ChatPage() {
                 </Conversation>
               );
             })}
-            {/* <h3 style={{ marginLeft: 10 }}> Direct Messages </h3>
+            <h3 style={{ marginLeft: 10 }}> Direct Messages </h3>
             {chatSideBar["direct_rooms"] && chatSideBar["direct_rooms"].map((item, index) => {
               return (
                 <Conversation
                   onClick={(event) => conversationChanged(item.room_id, item.room_name)}
                   key={'direct_' + index}
-                  name={item.name}
+                  name={item.title}
                   lastSenderName={item.lastSenderName}
                   info={item.info}
                   status={item.status}
@@ -130,7 +134,7 @@ function ChatPage() {
                 >
                 </Conversation>
               );
-            })} */}
+            })} 
           </ConversationList>
         </Sidebar>
 

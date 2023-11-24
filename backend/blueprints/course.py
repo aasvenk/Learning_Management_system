@@ -9,7 +9,7 @@ from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import (CourseRequests, Courses, Enrollment, Events, EventType,
-                    ModuleFiles, Modules, User, Grades)
+                    Grades, ModuleFiles, Modules, User)
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
@@ -650,4 +650,30 @@ def get_grades(courseid):
                 for grades in grade]
         return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}, 500)
+
+@course.route("/getClassmates/<courseid>", methods=["GET"])
+@jwt_required()
+def getClassmates(courseid):
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    if(Enrollment.query.filter_by(student_id= user.id, course_id = courseid) == None):
+        return make_response(jsonify(message="access denied"), 401)
+    response = []
+    teacher_id = Courses.query.get(courseid).instructor_id
+    if teacher_id != user.id:
+        teacher = User.query.get(teacher_id)
+        response.append({
+            "user_id" : teacher.id,
+            "name" : teacher.firstName + " " + teacher.lastName
+        })
+    classmate_ids = Enrollment.query.filter_by(course_id = courseid)
+
+    for classmate in classmate_ids:
+        if(classmate.student_id != user.id):
+            mateInfo = User.query.get(classmate.student_id)
+            response.append({
+                "user_id" : mateInfo.id,
+                "name" : mateInfo.firstName + " " + mateInfo.lastName
+            })
+    return make_response(jsonify(mates =response), 200 )

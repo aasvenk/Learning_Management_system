@@ -70,6 +70,21 @@ class Courses(db.Model):
     instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     instructor = db.relationship('User', foreign_keys=[instructor_id])
 
+class Assignments(db.Model):
+    __tablename__ = 'assignments'   
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String())
+    description = db.Column(db.String())
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+
+class Submissions(db.Model):
+    __tablename__ = 'submissions'   
+    id = db.Column(db.Integer, primary_key = True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignment.id'))
+    description = db.Column(db.String(),default="")
+    file_path = db.Column(db.String(120))
+    created = db.Column(DateTime, default=datetime.utcnow)
+
 class Modules(db.Model):
     __tablename__ = 'modules'
     id = db.Column(db.Integer, primary_key = True)
@@ -128,6 +143,7 @@ class ChatRoomEnrollment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
     room = db.relationship('ChatRooms', foreign_keys=[room_id])
+
 class Grades(db.Model):
     __tablename__ = 'grades'
     id = db.Column(db.Integer, primary_key=True)
@@ -135,3 +151,4 @@ class Grades(db.Model):
     value = db.Column(db.String(), nullable=False)
     course_id = db.Column(db.Integer,db.ForeignKey('courses.id'),nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
