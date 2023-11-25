@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import axios from "axios"
+import axios from "axios";
+import React, { useState } from "react";
 
-function FileUpload({uploadPath, onfileUpload, courseId, moduleId}) {
-  
+function FileUpload({uploadPath, onfileUpload, courseId, moduleId, assignmentId}) {
   const [formData, setFormData] = useState({})
   const handleFileUpload = (event) => {
     event.preventDefault()
@@ -13,6 +12,7 @@ function FileUpload({uploadPath, onfileUpload, courseId, moduleId}) {
     data.append("file", formData["file"])
     data.append("course_id", courseId)
     data.append("module_id", moduleId)
+    data.append("assignment_id", assignmentId)
     axios.post(uploadPath, data, {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),

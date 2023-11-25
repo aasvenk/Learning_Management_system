@@ -8,21 +8,26 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AppHeader from "../../components/AppHeader";
+import Assignments from "../../components/Assignments";
 import CourseAnnoucements from "../../components/CourseAnnoucements";
 import CourseModule from "../../components/CourseModule";
 import EventCalendar from "../../components/EventCalendar";
 import Grades from "../../components/Grades";
-import { useSelector } from "react-redux";
 
 
 function CoursePage() {
-  const { role } = useSelector((state) => state.user.userInfo);
   const [courseDetails, setCourseDetails] = useState({})
   const { id } = useParams()
-  const [value, setValue] = useState("1");
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab');
+  const [value, setValue] = useState(tab);
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', newValue);
+    window.history.pushState({}, '', url.toString());
   }
 
   useEffect(() => {
@@ -39,7 +44,7 @@ function CoursePage() {
     .catch((error) => {
       console.error(error)
     });
-  }, [id])
+  }, [id, tab])
 
   return (
     <div>
@@ -59,7 +64,8 @@ function CoursePage() {
                 <Tab label="Modules" value="2" />
                 <Tab label = "Announcements" value = "3" /> 
                 <Tab label = "Calendar" value = "4" /> 
-                <Tab label = "Grades" value = "5" />
+                <Tab label = "Assignments" value = "5" /> 
+                <Tab label = "Grades" value = "6" />
               </TabList>
             </Box>
             <TabPanel value="1">
@@ -78,6 +84,9 @@ function CoursePage() {
               <EventCalendar />
             </TabPanel>
             <TabPanel value = "5">
+              <Assignments />
+            </TabPanel>
+            <TabPanel value = "6">
               <Grades /> 
             </TabPanel>
           </TabContext>

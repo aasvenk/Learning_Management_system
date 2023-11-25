@@ -1,13 +1,13 @@
+import Box from '@mui/material/Box';
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import Box from '@mui/material/Box';
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useEffect, useState } from "react";
-import axios from "axios"
+import { useNavigate } from "react-router-dom";
 
 function CourseList() {
   const [courses, setCourses] = useState([])
@@ -48,7 +48,7 @@ function CourseList() {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" onClick={() => navigate("/course/" + course.id)}>Open</Button>
+              <Button size="small" onClick={() => navigate("/course/" + course.id + '?tab=1')}>Open</Button>
             </CardActions>
           </Card>
         );
