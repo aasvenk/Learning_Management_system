@@ -99,4 +99,9 @@ INSERT INTO chat_messages(sender_id, room_id, content, sent_time) VALUES
 (1, 2, 'Welcome', timezone('utc', now())),
 (1, 3, 'Welcome', timezone('utc', now()));
 
+INSERT INTO assignments(title, description, course_id) VALUES
+('Assignment01', 'This is a introductory assignment', 101),
+('Assignment02', 'This is a introductory assignment', 101),
+('Assignment03', 'This is a introductory assignment', 101);
+
 

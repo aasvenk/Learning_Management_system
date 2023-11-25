@@ -8,9 +8,7 @@ from config import Configuration
 from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from models import (AssignmentFiles, Assignments, CourseRequests, Courses,
-                    Enrollment, Events, EventType, Grades, ModuleFiles,
-                    Modules, User, UserRole)
+from models import *
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
@@ -766,7 +764,51 @@ def upload_assignment_file():
 def open_assignment_file(filename):
     return send_from_directory(directory='static/uploads', path=filename, mimetype='application/pdf')
 
+@course.route('/submission/all', methods=["POST"])
+@jwt_required()
+def all_submissions():
+    data = request.json
+    assignment_id = data["assignment_id"]
+    student_id = data["student_id"]
+    res = []
+    submissions = Submissions.query.filter_by(assignment_id=assignment_id, user_id=student_id).all()
+    for s in submissions:
+        res.append({
+            "filename": s.file_name,
+            "filepath": s.file_path,
+            "created": s.created
+        })
+    return make_response(jsonify(submissions=res), 200)
 
+
+@course.route('/submission/file/upload', methods=["POST"])
+@jwt_required()
+def upload_submission_file():
+    data = request.form
+    assignment_id = data["assignment_id"]
+    student_id = data["student_id"]
+    file = request.files['file']
+
+    if file.filename == '':
+        return make_response(jsonify(status="Empty file name"), 400)
+    elif not allowed_file(file.filename):
+        return make_response(jsonify(status="File type not allowed"), 400)
+
+    filename = secure_filename(file.filename)
+    filepath = token_urlsafe(16) + '.pdf'
+    file.save(os.path.join('static/uploads', filepath))
+
+    db.session.add(
+        Submissions(assignment_id=assignment_id, user_id=student_id, file_name=filename, file_path=filepath)
+    )
+    db.session.commit()
+
+    return make_response(jsonify(status="success"), 200)
+
+
+@course.route('/submission/file/<filename>', methods=['GET'])
+def open_submission_file(filename):
+    return send_from_directory(directory='static/uploads', path=filename, mimetype='application/pdf')
 
 
 ## get grades of all students enrolled for a particular course on instructor Grades page
