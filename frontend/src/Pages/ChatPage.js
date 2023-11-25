@@ -11,12 +11,12 @@ import {
   MessageSeparator,
   Sidebar
 } from "@chatscope/chat-ui-kit-react";
-import ComposeMessage from '../components/ComposeMessage';
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector } from 'react-redux';
 import AppHeader from "../components/AppHeader";
+import ComposeMessage from '../components/ComposeMessage';
 import { socket } from "../socket";
 
 

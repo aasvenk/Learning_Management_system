@@ -4,7 +4,7 @@ import TextField from "@mui/material/TextField";
 import axios from "axios";
 import React, { useState } from "react";
 
-function FileUpload({uploadPath, onfileUpload, courseId, moduleId, assignmentId}) {
+function FileUpload({uploadPath, onfileUpload, courseId, moduleId, assignmentId, studentId}) {
   const [formData, setFormData] = useState({})
   const handleFileUpload = (event) => {
     event.preventDefault()
@@ -13,6 +13,7 @@ function FileUpload({uploadPath, onfileUpload, courseId, moduleId, assignmentId}
     data.append("course_id", courseId)
     data.append("module_id", moduleId)
     data.append("assignment_id", assignmentId)
+    data.append("student_id", studentId)
     axios.post(uploadPath, data, {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("hoosier_room_token"),

@@ -81,7 +81,8 @@ class Submissions(db.Model):
     __tablename__ = 'submissions'   
     id = db.Column(db.Integer, primary_key = True)
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
-    description = db.Column(db.String(),default="")
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    file_name = db.Column(db.String(120))
     file_path = db.Column(db.String(120))
     created = db.Column(DateTime, default=datetime.utcnow)
 

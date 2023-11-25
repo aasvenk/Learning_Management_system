@@ -19,7 +19,9 @@ import { useParams } from "react-router-dom";
 import FileUpload from "./FileUpload";
 
 function Assignments() {
-  const { role } = useSelector((state) => state.user.userInfo);
+  const { userInfo } = useSelector((state) => state.user);
+  const role = userInfo.role
+  const user_id = userInfo.id
   const [view, setView] = useState([]);
   const {id} = useParams()
 
@@ -134,7 +136,22 @@ function Assignments() {
       description: '',
       files: ['file']
     })
-    useEffect(() => {
+    const [submissions, setSubmissions] = useState([])
+    const getSubmissions = () => {
+      axios
+      .post('/submission/all', {
+        'assignment_id': assignment_id,
+        'student_id': user_id
+      })
+      .then((res) => {
+        const {submissions} = res.data
+        setSubmissions(submissions)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }
+    const getAssignment = () => {
       axios
       .get('/assignment/' + assignment_id)
       .then((res) => {
@@ -144,6 +161,12 @@ function Assignments() {
       .catch((err) => {
         console.log(err)
       })
+      if (role === 'Student') {
+        getSubmissions()
+      }
+    }
+    useEffect(() => {
+      getAssignment()
     }, [])
     return (
       <Box>
@@ -162,13 +185,58 @@ function Assignments() {
         <br/>
         {role === 'Instructor' && (
           <Box>
+            <hr/>
             <h2>Instructor Area</h2>
-          <hr/>
-          <h3>Upload new file</h3>
+            <h3>Upload new file</h3>
             <FileUpload
               assignmentId={assignment.id}
               uploadPath="/assignment/file/upload"
-              onfileUpload={(file) => alert("File uploaded successfully")}
+              onfileUpload={(file) => {
+                alert("File uploaded successfully")
+                getAssignment()
+              }}
+            />
+          </Box>
+        )}
+        {role === 'Student' && (
+          <Box>
+            <hr/>
+            <h3>Submissions</h3>
+            <h4>Previous submissions</h4>
+            {submissions.length === 0 && <p>No previous submissions</p>}
+            {submissions.length !== 0 && (
+              <Box sx={{ textAlign: "center" }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>File name</TableCell>
+                        <TableCell>Created</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {submissions.map((row, index) => (
+                        <TableRow key={index} sx={{cursor: 'pointer'}}>
+                          <TableCell>{index+1}</TableCell>
+                          <TableCell>{row.filename}</TableCell>
+                          <TableCell>{row.created}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            )}
+            <h4>New submission</h4>
+            <FileUpload
+              assignmentId={assignment.id}
+              studentId={user_id}
+              uploadPath="/submission/file/upload"
+              onfileUpload={(file) => {
+                getSubmissions()
+                alert("File uploaded successfully")
+              }}
             />
           </Box>
         )}
@@ -205,16 +273,18 @@ function Assignments() {
                 <ListItemText primary="View All" />
               </ListItemButton>
             </ListItem>
-            <ListItem
-              disablePadding
-              onClick={() => {
-                setView(["create"]);
-              }}
-            >
-              <ListItemButton>
-                <ListItemText primary="Create" />
-              </ListItemButton>
-            </ListItem>
+            {role === 'Instructor' && (
+              <ListItem
+                disablePadding
+                onClick={() => {
+                  setView(["create"]);
+                }}
+              >
+                <ListItemButton>
+                  <ListItemText primary="Create" />
+                </ListItemButton>
+              </ListItem>
+            )}
           </List>
           {/* </Box> */}
         </Grid>
