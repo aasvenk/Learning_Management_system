@@ -85,6 +85,14 @@ class Submissions(db.Model):
     file_path = db.Column(db.String(120))
     created = db.Column(DateTime, default=datetime.utcnow)
 
+class AssignmentFiles(db.Model):
+    __tablename__ = 'assignment_files'
+    id = db.Column(db.Integer, primary_key = True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
+    module = db.relationship('Assignments', foreign_keys=[assignment_id])
+    file_name = db.Column(db.String(120))
+    file_path = db.Column(db.String(120))
+
 class Modules(db.Model):
     __tablename__ = 'modules'
     id = db.Column(db.Integer, primary_key = True)

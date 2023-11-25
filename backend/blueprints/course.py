@@ -8,8 +8,9 @@ from config import Configuration
 from flask import (Blueprint, jsonify, make_response, request,
                    send_from_directory)
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from models import (CourseRequests, Courses, Enrollment, Events, EventType,
-                    Grades, ModuleFiles, Modules, User)
+from models import (AssignmentFiles, Assignments, CourseRequests, Courses,
+                    Enrollment, Events, EventType, Grades, ModuleFiles,
+                    Modules, User, UserRole)
 from utils import convert_user_role, string_to_event_type
 from werkzeug.utils import secure_filename
 
@@ -678,6 +679,93 @@ def getClassmates(courseid):
                 "name" : mateInfo.firstName + " " + mateInfo.lastName
             })
     return make_response(jsonify(mates =response), 200 )
+
+'''
+Assignment
+'''
+@course.route("/course/<course_id>/assignment/create", methods=["POST"])
+@jwt_required()
+def create_assignment(course_id):
+    email = get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return make_response(jsonify(status="success", msg="invalid user"), 401)
+    
+    if user.role != UserRole.INSTRUCTOR:
+        return make_response(jsonify(status="success", msg="no access"), 401)
+
+    data = request.json
+    if 'title' not in data or 'description' not in data:
+        return make_response(jsonify(status="error", msg="not enough details"), 200)
+    
+    assignment = Assignments(
+        title=data['title'],
+        description=data['description'],
+        course_id=course_id
+    )
+    db.session.add(assignment)
+    db.session.commit()
+    return make_response(jsonify(status="success", msg="assignment created"), 201)
+
+@course.route("/course/<course_id>/assignment/all", methods=["GET"])
+@jwt_required()
+def all_assignments(course_id):
+    assignments = Assignments.query.filter_by(course_id=course_id).all()
+    res = []
+    for i in assignments:
+        a = {}
+        a['id'] = i.id
+        a['title'] = i.title
+        a['description'] = i.description
+        res.append(a)
+    return make_response(jsonify(assignments=res), 200)
+
+@course.route("/assignment/<assignment_id>", methods=["GET"])
+@jwt_required()
+def single_assignment(assignment_id):
+    assignment = Assignments.query.filter_by(id=assignment_id).first()
+    res = {}
+    res['id'] = assignment.id
+    res['title'] = assignment.title
+    res['description'] = assignment.description
+    res['files'] = []
+    files = AssignmentFiles.query.filter_by(assignment_id=assignment_id).all()
+    for file in files:
+        res['files'].append({
+            "filename": file.file_name,
+            "filepath": file.file_path,
+        })
+    return make_response(jsonify(assignment=res), 200)
+
+@course.route('/assignment/file/upload', methods=["POST"])
+@jwt_required()
+def upload_assignment_file():
+    data = request.form
+    assignment_id = data["assignment_id"]
+    file = request.files['file']
+
+    if file.filename == '':
+        return make_response(jsonify(status="Empty file name"), 400)
+    elif not allowed_file(file.filename):
+        return make_response(jsonify(status="File type not allowed"), 400)
+
+    # filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
+    filename = secure_filename(file.filename)
+    filepath = token_urlsafe(16) + '.pdf'
+    file.save(os.path.join('static/uploads', filepath))
+
+    db.session.add(
+        AssignmentFiles(assignment_id=assignment_id, file_name=filename, file_path=filepath)
+    )
+    db.session.commit()
+
+    return make_response(jsonify(status="success"), 200)
+
+
+@course.route('/assignment/file/<filename>', methods=['GET'])
+def open_assignment_file(filename):
+    return send_from_directory(directory='static/uploads', path=filename, mimetype='application/pdf')
+
 
 
 
