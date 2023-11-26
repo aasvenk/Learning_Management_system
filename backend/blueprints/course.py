@@ -876,8 +876,7 @@ def grading():
     rows=[]
     cols = []
     cols.append({
-        'name': 'student_name',
-        'value': 'Student Name'
+        'name': 'Student Name',
     })
     for x in course_assignments.keys():
         cols.append({
