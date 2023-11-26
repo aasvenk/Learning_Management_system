@@ -703,6 +703,12 @@ def create_assignment(course_id):
     )
     db.session.add(assignment)
     db.session.commit()
+
+    # Creates grades records for all students enrolled
+    enrollments = Enrollment.query.filter_by(course_id=course_id).all()
+    for e in enrollments:
+        db.session.add(Grades(assignment_id=assignment.id, student_id=e.student_id))
+    db.session.commit()
     return make_response(jsonify(status="success", msg="assignment created"), 201)
 
 @course.route("/course/<course_id>/assignment/all", methods=["GET"])
@@ -810,57 +816,101 @@ def upload_submission_file():
 def open_submission_file(filename):
     return send_from_directory(directory='static/uploads', path=filename, mimetype='application/pdf')
 
-
-## get grades of all students enrolled for a particular course on instructor Grades page
-@course.route("/course/<courseid>/instgetgrades", methods=["GET"])
+@course.route('/grades/all', methods=["POST"])
 @jwt_required()
-def get_grades_inst(courseid):
-    email = get_jwt_identity()
-    students = User.query.filter_by(role="STUDENT").all()
+def all_grades():
+    data = request.json
+    course_id = data["course_id"]
+    student_id = data["student_id"]
 
-    try:
-        results = []
-        for student in students:
-            grade = Grades.query.filter_by(user_id=student.id, course_id=courseid).all()
-            for g in grade:
-                result = {
-                    "user_id": student.id,
-                    "user_email":student.email,
-                    "course_id": g.course_id,
-                    "title": g.name,
-                    "graded_result": g.value
-                }
-                results.append(result)
-        return jsonify(results)
-    except Exception as e:
-        return jsonify({"error": str(e)}, 500)
+    grades = {}
+
+    assignments = Assignments.query.filter_by(course_id=course_id).all()
+    a_ids = []
+    for a in assignments:
+        a_ids.append(a.id)
+        assignment = {}
+        assignment['id'] = a.id
+        assignment['title'] = a.title
+        assignment['total'] = str(a.total)
+        assignment['marks'] = '-'
+        grades[a.id] = assignment
     
+    q = Grades.query.filter_by(student_id=student_id).filter(Grades.assignment_id.in_(a_ids)).all()
+    for g in q:
+        grades[g.id]['marks'] = g.marks
     
 
-### Publish grades by instructor by giving student id and assignment name and grade value for a particular course by instructor 
-@course.route("/course/<courseid>/publishgrades", methods=["POST"])
+    return make_response(jsonify(grades=list(grades.values())), 200)
+
+@course.route('/grading', methods=["POST"])
 @jwt_required()
-def publish_grades(courseid):
-    current_user_id = get_jwt_identity()
+def grading():
+    data = request.json
+    course_id = data["course_id"]
 
-    data = request.get_json()
+    res = {}
+    enrollments = Enrollment.query.filter_by(course_id=course_id).all()
+    for e in enrollments:
+        student = {
+            'id': e.student.id,
+            'name': e.student.firstName + ', ' + e.student.lastName
+        }
+        res[e.student.id] = student
     
-    if "grades" not in data or not isinstance(data["grades"], list):
-        return jsonify({"message": "Invalid data format"}), 400
 
-    for grade_data in data["grades"]:
-        name = grade_data.get("name")
-        value = grade_data.get("value")
-        user_id = grade_data.get("user_id")
+    assignments = Assignments.query.filter_by(course_id=course_id).all()
+    course_assignments = {}
+    for a in assignments:
+        course_assignments[a.id] = {
+            'id': a.id,
+            'title': a.title
+        }
+    
+    print(course_assignments)
+    
+    q = Grades.query.filter(Grades.assignment_id.in_(course_assignments.keys())).all()
+    for g in q:
+        res[g.student_id][g.assignment_id] = g.marks
 
-        new_grade = Grades(name=name, value=value, course_id=courseid, user_id=user_id)
+    rows=[]
+    cols = []
+    cols.append({
+        'name': 'student_name',
+        'value': 'Student Name'
+    })
+    for x in course_assignments.keys():
+        cols.append({
+            'name': course_assignments[x]['title'],
+            'id': x
+        })
+    
+    rows = []
+    for r in res.values():
+        print(r)
+        row = []
+        row.append({
+            'student_id': r['id'],
+            'student_name': r['name']
+        })
+        for a in course_assignments.keys():
+            row.append({
+                'assignment_id': a,
+                'marks': r[a]
+            })
+        rows.append(row)
+    return make_response(jsonify(rows=rows, cols=cols), 200)
 
-        db.session.add(new_grade)
+@course.route('/update_marks', methods=["POST"])
+@jwt_required()
+def update_marks():
+    data = request.json
+    assignment_id = data['assignment_id']
+    student_id = data['student_id']
+    marks = data['marks']
+
+    submission = Grades.query.filter_by(student_id=student_id, assignment_id=assignment_id).first()
+    submission.marks = marks
     db.session.commit()
 
-    return jsonify({"message": "Grades published successfully"}), 201
-
-    
-    
-
-    
+    return make_response(jsonify(status="success"), 200)
