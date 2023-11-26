@@ -76,6 +76,9 @@ class Assignments(db.Model):
     title = db.Column(db.String())
     description = db.Column(db.String())
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    total = db.Column(db.Integer,  default=100)
+
+    course = db.relationship('Courses', foreign_keys=[course_id])
 
 class Submissions(db.Model):
     __tablename__ = 'submissions'   
@@ -90,9 +93,18 @@ class AssignmentFiles(db.Model):
     __tablename__ = 'assignment_files'
     id = db.Column(db.Integer, primary_key = True)
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
-    module = db.relationship('Assignments', foreign_keys=[assignment_id])
+    assignment = db.relationship('Assignments', foreign_keys=[assignment_id])
     file_name = db.Column(db.String(120))
     file_path = db.Column(db.String(120))
+
+class Grades(db.Model):
+    __tablename__ = 'grades'
+    id = db.Column(db.Integer, primary_key = True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    marks = db.Column(db.String, default='-')
+    
+    assignment = db.relationship('Assignments', foreign_keys=[assignment_id])
 
 class Modules(db.Model):
     __tablename__ = 'modules'
@@ -114,8 +126,7 @@ class Enrollment(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
 
-    #student = db.relationship('User', backref='enrollments')
-    # course = db.relationship('Courses', backref='enrollments')
+    student = db.relationship('User', foreign_keys=[student_id])
 
 class PasswordRecovery(db.Model):
     __tablename__ = 'password_recovery'
@@ -152,12 +163,4 @@ class ChatRoomEnrollment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'))
     room = db.relationship('ChatRooms', foreign_keys=[room_id])
-
-class Grades(db.Model):
-    __tablename__ = 'grades'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(),nullable=False)
-    value = db.Column(db.String(), nullable=False)
-    course_id = db.Column(db.Integer,db.ForeignKey('courses.id'),nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
