@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import SelectDownload from './SelectDownload.js';
+import DisplayOptions from './DisplayOptions.js';
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -30,27 +31,10 @@ function Assignments() {
   const user_id = userInfo.id
   const [view, setView] = useState([]);
   const {id} = useParams()
-  const [submission_to_download, changeSelection] = useState('');
-  const handleSelectDLChange = (event) => {
-	  changeSelection(event.target.value);
-  };
 
-  const [students,updatestudents] = useState([]);
-  const selected_student = '';
-  useEffect( () => {
-  if(role === 'Instructor'){
-	  axios.get("getClassmates/" + id).then((res) =>{
-		  const {mates} = res.data;
-		  console.log('doing ittttttttttttt');
-		  console.log(mates);
-		  const temp = mates.map( (mate) => mate);
-		  updatestudents(temp);
-	  }).catch( () => {
-		  console.log("error fetching students");
-	  });
-  };
-  }, []);
-console.log(submission_to_download);
+  
+
+
   const ViewAll = ({changeView}) => {
     const [assignments, setAssignments] = useState([]);
     useEffect(() => {
@@ -203,8 +187,7 @@ console.log(submission_to_download);
         <br/>
         <br/>
         <br/>
-        {role === 'Instructor' && (
-          <Box>
+        {role === 'Instructor' && (	 <div>  <Box>
             <hr/>
             <h2>Instructor Area</h2>
             <h3>Upload new file</h3>
@@ -216,23 +199,8 @@ console.log(submission_to_download);
                 getAssignment()
               }}
             />
-			<br/>
-			<h3>Download Submissions From: </h3>
-			  <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Student</InputLabel>
-        <Select
-          labelId="demo-simple-selec"
-          id="demo-simple-"
-          value={selected_student}
-          label="sss"
-        >
-		{students.length !== 0 && students.map((val, index) => {
-			  return (<MenuItem key = {index} value={val.student_id}>{val.name}</ MenuItem>)
-		})}
-        </Select>
-      </FormControl>
-          </Box>
-        )}
+          </Box><DisplayOptions assignmentId ={assignment_id} courseId = {id}/> </div>)
+        }
 		
         {role === 'Student' && (
           <Box>

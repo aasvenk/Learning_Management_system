@@ -778,7 +778,10 @@ def all_submissions():
     assignment_id = data["assignment_id"]
     student_id = data["student_id"]
     res = []
+    
     submissions = Submissions.query.filter_by(assignment_id=assignment_id, user_id=student_id).all()
+ 
+        
     for s in submissions:
         res.append({
             "filename": s.file_name,
