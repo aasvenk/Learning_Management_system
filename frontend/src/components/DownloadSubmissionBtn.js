@@ -2,12 +2,12 @@ import DownloadIcon from '@mui/icons-material/Download';
 import Button from '@mui/material/Button';
 import downloadAssignment from '../helpers/downloadAssignment';
 
-export default function download_submission_btn(fileName, file_ext){
-    const downloadURL = '/downloadSubmission/' + fileName + '/' + file_ext;
-   
+export default function DownloadSubmissionBtn(props){
+	console.log("right here");
+	console.log(props.fileName)
     return (
     
-        <div><Button component="label" variant="contained" onClick = {() => downloadAssignment(downloadURL, fileName, file_ext)} startIcon={<DownloadIcon />}>Download Submission</Button></div>
+        <div><Button component="label" variant="contained" onClick = {() => downloadAssignment(props.fileName)} startIcon={<DownloadIcon />}>{props.title}</Button></div>
         );
     }
     

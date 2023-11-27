@@ -2,6 +2,9 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
+  OutlinedInput,
+  FormControl,
   Grid,
   List,
   ListItem,
@@ -10,13 +13,16 @@ import {
   Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField,
-  TextareaAutosize
+  TextareaAutosize,
+  InputLabel, MenuItem, Select
 } from "@mui/material";
 import axios from "axios";
+import SelectDownload from './SelectDownload.js';
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import FileUpload from "./FileUpload";
+import DownloadSubmissionBtn from './DownloadSubmissionBtn.js';
 
 function Assignments() {
   const { userInfo } = useSelector((state) => state.user);
@@ -24,7 +30,27 @@ function Assignments() {
   const user_id = userInfo.id
   const [view, setView] = useState([]);
   const {id} = useParams()
+  const [submission_to_download, changeSelection] = useState('');
+  const handleSelectDLChange = (event) => {
+	  changeSelection(event.target.value);
+  };
 
+  const [students,updatestudents] = useState([]);
+  const selected_student = '';
+  useEffect( () => {
+  if(role === 'Instructor'){
+	  axios.get("getClassmates/" + id).then((res) =>{
+		  const {mates} = res.data;
+		  console.log('doing ittttttttttttt');
+		  console.log(mates);
+		  const temp = mates.map( (mate) => mate);
+		  updatestudents(temp);
+	  }).catch( () => {
+		  console.log("error fetching students");
+	  });
+  };
+  }, []);
+console.log(submission_to_download);
   const ViewAll = ({changeView}) => {
     const [assignments, setAssignments] = useState([]);
     useEffect(() => {
@@ -173,13 +199,7 @@ function Assignments() {
         <h2>{assignment.title}</h2>
         <p>{assignment.description}</p>
         <h3>Files</h3>
-        <ul>
-          {assignment.files.map((item, index) => {
-            return (
-              <li key={index}><a href={process.env.REACT_APP_BASE_URL + '/assignment/file/' + item.filepath} target="_blank" rel="noreferrer">{item.filename}</a></li>
-            )
-          })}
-        </ul>
+		<SelectDownload options = {assignment.files} />
         <br/>
         <br/>
         <br/>
@@ -196,8 +216,24 @@ function Assignments() {
                 getAssignment()
               }}
             />
+			<br/>
+			<h3>Download Submissions From: </h3>
+			  <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">Student</InputLabel>
+        <Select
+          labelId="demo-simple-selec"
+          id="demo-simple-"
+          value={selected_student}
+          label="sss"
+        >
+		{students.length !== 0 && students.map((val, index) => {
+			  return (<MenuItem key = {index} value={val.student_id}>{val.name}</ MenuItem>)
+		})}
+        </Select>
+      </FormControl>
           </Box>
         )}
+		
         {role === 'Student' && (
           <Box>
             <hr/>
@@ -205,28 +241,7 @@ function Assignments() {
             <h4>Previous submissions</h4>
             {submissions.length === 0 && <p>No previous submissions</p>}
             {submissions.length !== 0 && (
-              <Box sx={{ textAlign: "center" }}>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>File name</TableCell>
-                        <TableCell>Created</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {submissions.map((row, index) => (
-                        <TableRow key={index} sx={{cursor: 'pointer'}}>
-                          <TableCell>{index+1}</TableCell>
-                          <TableCell>{row.filename}</TableCell>
-                          <TableCell>{row.created}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
+              <SelectDownload options = {submissions} />
             )}
             <h4>New submission</h4>
             <FileUpload

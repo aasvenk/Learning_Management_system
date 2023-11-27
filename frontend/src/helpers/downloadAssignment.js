@@ -1,9 +1,11 @@
 import axios from 'axios';
 
 
-export default function download(downloadURL, fileName, file_ext){
+export default function download(filename){
+
+const file_ext = filename.split('.').pop();
 axios({
-    url: downloadURL,
+    url: '/assignment/file/' + filename,
     method: 'GET',
     responseType: 'blob',
     headers : {
@@ -11,6 +13,7 @@ axios({
       }
   })
     .then(response => {
+		
     const options = "application/" + file_ext;
       const file = new Blob([response.data], {options});
       const href = window.URL.createObjectURL(file);
@@ -18,7 +21,7 @@ axios({
       const anchorElement = document.createElement('a');
 
       anchorElement.href = href;
-      anchorElement.download = fileName + file_ext;
+      anchorElement.download = filename;
 
       document.body.appendChild(anchorElement);
       anchorElement.click();
