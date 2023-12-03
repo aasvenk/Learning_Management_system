@@ -2,6 +2,9 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
+  OutlinedInput,
+  FormControl,
   Grid,
   List,
   ListItem,
@@ -10,13 +13,17 @@ import {
   Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField,
-  TextareaAutosize
+  TextareaAutosize,
+  InputLabel, MenuItem, Select
 } from "@mui/material";
 import axios from "axios";
+import SelectDownload from './SelectDownload.js';
+import DisplayOptions from './DisplayOptions.js';
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import FileUpload from "./FileUpload";
+import DownloadSubmissionBtn from './DownloadSubmissionBtn.js';
 
 function Assignments() {
   const { userInfo } = useSelector((state) => state.user);
@@ -24,6 +31,9 @@ function Assignments() {
   const user_id = userInfo.id
   const [view, setView] = useState([]);
   const {id} = useParams()
+
+  
+
 
   const ViewAll = ({changeView}) => {
     const [assignments, setAssignments] = useState([]);
@@ -173,18 +183,11 @@ function Assignments() {
         <h2>{assignment.title}</h2>
         <p>{assignment.description}</p>
         <h3>Files</h3>
-        <ul>
-          {assignment.files.map((item, index) => {
-            return (
-              <li key={index}><a href={process.env.REACT_APP_BASE_URL + '/assignment/file/' + item.filepath} target="_blank" rel="noreferrer">{item.filename}</a></li>
-            )
-          })}
-        </ul>
+		<SelectDownload options = {assignment.files} />
         <br/>
         <br/>
         <br/>
-        {role === 'Instructor' && (
-          <Box>
+        {role === 'Instructor' && (	 <div>  <Box>
             <hr/>
             <h2>Instructor Area</h2>
             <h3>Upload new file</h3>
@@ -196,8 +199,9 @@ function Assignments() {
                 getAssignment()
               }}
             />
-          </Box>
-        )}
+          </Box><DisplayOptions assignmentId ={assignment_id} courseId = {id}/> </div>)
+        }
+		
         {role === 'Student' && (
           <Box>
             <hr/>
@@ -205,28 +209,7 @@ function Assignments() {
             <h4>Previous submissions</h4>
             {submissions.length === 0 && <p>No previous submissions</p>}
             {submissions.length !== 0 && (
-              <Box sx={{ textAlign: "center" }}>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>File name</TableCell>
-                        <TableCell>Created</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {submissions.map((row, index) => (
-                        <TableRow key={index} sx={{cursor: 'pointer'}}>
-                          <TableCell>{index+1}</TableCell>
-                          <TableCell>{row.filename}</TableCell>
-                          <TableCell>{row.created}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
+              <SelectDownload options = {submissions} />
             )}
             <h4>New submission</h4>
             <FileUpload

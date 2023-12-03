@@ -577,7 +577,7 @@ def upload_module_file():
 
     # filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
     filename = secure_filename(file.filename)
-    filepath = token_urlsafe(16) + '.pdf'
+    filepath = token_urlsafe(16) + '.' + filename.rsplit('.', 1)[1].lower
     file.save(os.path.join('static/uploads', filepath))
 
     db.session.add(
@@ -755,7 +755,7 @@ def upload_assignment_file():
 
     # filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
     filename = secure_filename(file.filename)
-    filepath = token_urlsafe(16) + '.pdf'
+    filepath = token_urlsafe(16) + '.' + file.filename.rsplit('.', 1)[1].lower()
     file.save(os.path.join('static/uploads', filepath))
 
     db.session.add(
@@ -767,8 +767,9 @@ def upload_assignment_file():
 
 
 @course.route('/assignment/file/<filename>', methods=['GET'])
+@jwt_required()
 def open_assignment_file(filename):
-    return send_from_directory(directory='static/uploads', path=filename, mimetype='application/pdf')
+    return send_from_directory(directory='static/uploads', path=filename)
 
 @course.route('/submission/all', methods=["POST"])
 @jwt_required()
@@ -777,7 +778,10 @@ def all_submissions():
     assignment_id = data["assignment_id"]
     student_id = data["student_id"]
     res = []
+    
     submissions = Submissions.query.filter_by(assignment_id=assignment_id, user_id=student_id).all()
+ 
+        
     for s in submissions:
         res.append({
             "filename": s.file_name,
@@ -801,7 +805,7 @@ def upload_submission_file():
         return make_response(jsonify(status="File type not allowed"), 400)
 
     filename = secure_filename(file.filename)
-    filepath = token_urlsafe(16) + '.pdf'
+    filepath = token_urlsafe(16) + '.' + file.filename.rsplit('.', 1)[1].lower()
     file.save(os.path.join('static/uploads', filepath))
 
     db.session.add(
