@@ -1,4 +1,4 @@
-# Fronend
+# Frontend
 
 ## Development setup
 
@@ -20,7 +20,9 @@ REACT_APP_BASE_URL=
 npm run start
 ```
 
-## Productions
+## Production
+
+Build locally and push the build to the VM
 
 ```
 npm run build
