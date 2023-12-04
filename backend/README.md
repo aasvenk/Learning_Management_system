@@ -68,6 +68,8 @@ gunicorn -w 4 'app:app'
 # Run in background
 gunicorn -w 4 'app:app' --daemon
 pkill gunicorn
+
+sudo nohup flask run --debug -p 8000 > nohup.log 2>&1 &
 ```
 
 ## References
