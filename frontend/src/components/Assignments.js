@@ -23,7 +23,8 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import FileUpload from "./FileUpload";
-import DownloadSubmissionBtn from './DownloadSubmissionBtn.js';
+import UploadSubmissionToggle from './UploadSubmissionToggle.js';
+
 
 function Assignments() {
   const { userInfo } = useSelector((state) => state.user);
@@ -31,7 +32,7 @@ function Assignments() {
   const user_id = userInfo.id
   const [view, setView] = useState([]);
   const {id} = useParams()
-
+ 
   
 
 
@@ -203,7 +204,7 @@ function Assignments() {
         }
 		
         {role === 'Student' && (
-          <Box>
+          <Box id = 'contained-box'>
             <hr/>
             <h3>Submissions</h3>
             <h4>Previous submissions</h4>
@@ -212,15 +213,8 @@ function Assignments() {
               <SelectDownload options = {submissions} />
             )}
             <h4>New submission</h4>
-            <FileUpload
-              assignmentId={assignment.id}
-              studentId={user_id}
-              uploadPath="/submission/file/upload"
-              onfileUpload={(file) => {
-                getSubmissions()
-                alert("File uploaded successfully")
-              }}
-            />
+              <UploadSubmissionToggle assignment_id = {assignment.id}></UploadSubmissionToggle>
+            
           </Box>
         )}
       </Box>
