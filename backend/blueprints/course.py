@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from operator import and_
 from secrets import token_urlsafe
-
+import time
 from app import db
 from config import Configuration
 from flask import (Blueprint, jsonify, make_response, request,
@@ -740,6 +740,33 @@ def single_assignment(assignment_id):
             "filepath": file.file_path,
         })
     return make_response(jsonify(assignment=res), 200)
+@course.route('/submitViaText', methods = ["POST"])
+@jwt_required()
+def submit_via_text():
+    message = request.get_json()['submission']
+    assignment_id = message['assignment_id']
+    student_id = message['user_id']
+    submission = message['submission_entry']
+    
+    #verify 
+    if not Assignments.query.filter_by(id=int(assignment_id)).first():
+        return make_response(jsonify({'msg' : 'forbidden, no course'}), 401)
+    
+    else:
+        filename = secure_filename(str(student_id) + str(int(time.time())))
+        filepath = token_urlsafe(16) + '.' + '.txt'
+        with open('static/uploads/' + filepath, 'w') as w:
+            w.write(submission)
+            db.session.add(
+                Submissions(assignment_id=assignment_id, user_id=student_id, file_name=filename, file_path=filepath)
+            )
+            db.session.commit()        
+    
+        
+    
+        return make_response(jsonify({'msg':"success"}), 200)        
+    
+    
 
 @course.route('/assignment/file/upload', methods=["POST"])
 @jwt_required()
