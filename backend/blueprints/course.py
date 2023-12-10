@@ -577,7 +577,7 @@ def upload_module_file():
 
     # filename = "course_" + course_id + "_module_" + module_id + "_" + file.filename
     filename = secure_filename(file.filename)
-    filepath = token_urlsafe(16) + '.' + filename.rsplit('.', 1)[1].lower
+    filepath = token_urlsafe(16) + '.' + filename.rsplit('.', 1)[1].lower()
     file.save(os.path.join('static/uploads', filepath))
 
     db.session.add(
