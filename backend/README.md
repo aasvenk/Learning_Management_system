@@ -69,7 +69,7 @@ gunicorn -w 4 'app:app'
 gunicorn -w 4 'app:app' --daemon
 pkill gunicorn
 
-nohup flask run --debug -p 8000
+nohup flask run --debug -p 8000 &
 ```
 
 ## References
