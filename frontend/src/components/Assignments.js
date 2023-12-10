@@ -213,7 +213,7 @@ function Assignments() {
               <SelectDownload options = {submissions} />
             )}
             <h4>New submission</h4>
-              <UploadSubmissionToggle assignment_id = {assignment.id}></UploadSubmissionToggle>
+              <UploadSubmissionToggle assignment_id = {assignment.id} user_id ={user_id} updateSubmissions={getSubmissions}></UploadSubmissionToggle>
             
           </Box>
         )}

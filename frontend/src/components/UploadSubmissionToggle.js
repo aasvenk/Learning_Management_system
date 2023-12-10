@@ -3,7 +3,9 @@ import Switch from '@mui/material/Switch';
 import Button from '@mui/material/Button';
 import FileUpload from "./FileUpload";
 import {useState} from 'react';
-const UploadSubmissionToggle = ({assignment_id,user_id}) => {
+import axios from 'axios';
+
+const UploadSubmissionToggle = ({assignment_id,user_id, updateSubmissions}) => {
 
     const [switchState, changeSwitch] = useState(0);
  
@@ -24,7 +26,20 @@ const UploadSubmissionToggle = ({assignment_id,user_id}) => {
  
     const submitText = () => {
         let textbox = document.getElementById('entry')
-        console.log(textbox.value)
+        let submission = textbox.value
+        axios.post('/submitViaText', {
+            submission : {
+            assignment_id : assignment_id,
+            user_id : user_id,
+            submission_entry : submission,
+            },
+
+
+        }).then((resp) => {
+            updateSubmissions()
+            window.alert(resp.data.msg)
+
+        })
         }
     return (
         <div>
